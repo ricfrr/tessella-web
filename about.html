@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About tessel·la</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* About page specific styles */
+        .typewriter-text {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            opacity: 0;
+            overflow: hidden;
+            margin: 0;
+            transition: color 0.5s ease;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.5rem;
+            background-color: var(--cursor-color);
+            margin-left: 4px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            transition: background-color 0.5s ease;
+        }
+
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.5s ease, color 0.5s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .back-arrow {
+            display: inline-block;
+            margin-right: 5px;
+            color: var(--accent-color);
+            position: relative;
+            transition: transform 0.3s ease, color 0.5s ease;
+            overflow: hidden;
+            width: 1em;  /* Constrain width to character size */
+            text-align: center;
+        }
+
+        .back-link:hover .back-arrow {
+            transform: translateX(-5px);
+        }
+
+        /* Remove the previous after pseudo-element */
+        .back-arrow::after {
+            display: none;
+        }
+
+        /* Create sliding animation effect */
+        @keyframes slideArrow {
+            0% { transform: translateX(100%); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+        }
+
+        /* Add the animated dash that's always active */
+        .back-arrow::before {
+            content: "-";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            color: var(--accent-color);
+            animation: slideArrow 1s ease-in-out infinite;
+            z-index: -1;
+            transition: color 0.5s ease;
+        }
+
+        .robo-boy-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--button-color);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease, 
+                        border-color 0.5s ease, color 0.5s ease;
+            box-shadow: 0 0 10px var(--button-glow);
+            display: flex;
+            align-items: center;
+        }
+
+        .robo-boy-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--button-glow);
+        }
+        
+        .dancing-dash {
+            display: inline-block;
+            position: relative;
+            width: 20px;
+            height: 4px;
+            background-color: var(--accent-color);
+            margin: 0 4px;
+            border-radius: 2px;
+            animation: danceDash 3s infinite cubic-bezier(0.445, 0.05, 0.55, 0.95);
+            transform-origin: center;
+            transition: background-color 0.5s ease;
+        }
+        
+        @keyframes danceDash {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scaleX(1); 
+            }
+            25% { 
+                transform: translateY(-2px) rotate(2deg) scaleX(1.1); 
+            }
+            50% { 
+                transform: translateY(0) rotate(0deg) scaleX(0.95); 
+            }
+            75% { 
+                transform: translateY(1px) rotate(-1deg) scaleX(1.05); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link"><span class="back-arrow">←</span> Back</a>
+    <div class="theme-toggle">
+        <span class="theme-icon"><i class="fas fa-sun"></i></span>
+        <label class="theme-switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <div class="container">
+        <p class="typewriter-text">We are a collective of independent developers driven by passion. With joy, we explore the incredible possibilities of technology to craft meaningful and delightful human-machine interactions.</p>
+        <span class="cursor"></span>
+    </div>
+    <a href="robo-boy.html" class="robo-boy-button">robo<span class="dancing-dash"></span>boy</a>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const text = document.querySelector('.typewriter-text');
+            const cursor = document.querySelector('.cursor');
+            const backLink = document.querySelector('.back-link');
+            const roboButton = document.querySelector('.robo-boy-button');
+            const fullText = text.textContent;
+            
+            // Clear the text content to start empty
+            text.textContent = '';
+            text.style.opacity = '1';
+            
+            // Calculate typing speed to complete in about 2.5 seconds
+            const totalDuration = 2500; // 2.5 seconds in milliseconds
+            const typingSpeed = totalDuration / fullText.length;
+            
+            let charIndex = 0;
+            
+            function typeText() {
+                if (charIndex < fullText.length) {
+                    text.textContent += fullText.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeText, typingSpeed);
+                } else {
+                    // Typing finished
+                    cursor.style.animation = 'blink 1s step-end infinite';
+                    // Show back link and robo-boy button
+                    setTimeout(() => {
+                        backLink.style.opacity = '1';
+                        roboButton.style.opacity = '1';
+                    }, 500);
+                }
+            }
+            
+            // Start typing after a short delay
+            setTimeout(typeText, 300);
+        });
+    </script>
+</body>
+</html> 
