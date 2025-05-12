@@ -23,17 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
-            themeToggle.checked = true;
-            if (themeIcon) {
-                themeIcon.className = 'fas fa-moon'; // Set to moon icon in light mode
-            }
-        } else {
+        if (savedTheme === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
             themeToggle.checked = false;
             if (themeIcon) {
                 themeIcon.className = 'fas fa-sun'; // Set to sun icon in dark mode
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeToggle.checked = true;
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-moon'; // Set to moon icon in light mode
             }
         }
     }
