@@ -117,7 +117,7 @@ input:checked + .slider:before {
     animation: fadeInText 1.5s ease-out forwards;
     animation-delay: 0.5s; /* Start animation after a short delay */
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
     line-height: 1;
