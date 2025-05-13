@@ -8,8 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Robo-boy page specific styles */
+        body {
+            overflow-y: auto !important;
+            min-height: 100vh;
+        }
+        
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             padding: 40px;
             position: relative;
             text-align: center;
@@ -26,6 +31,7 @@
             position: relative;
             display: inline-flex;
             align-items: center;
+            margin-bottom: 40px;
         }
         
         .dancing-dash {
@@ -122,13 +128,95 @@
             to { opacity: 1; }
         }
 
-        .coming-soon {
-            margin-top: 40px;
-            font-size: 1.2rem;
+        /* Video section styles */
+        .video-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
             opacity: 0;
             animation: fadeIn 1s ease forwards;
             animation-delay: 0.8s;
-            transition: color 0.5s ease;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 380px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            padding: 2px;
+            background-color: var(--accent-color);
+        }
+
+        .video-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-frame {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+            border: none;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            transition: border-color 0.5s ease;
+        }
+
+        .video-title {
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin-top: 2px;
+            border-radius: 8px;
+            transition: color 0.5s ease, background-color 0.5s ease;
+        }
+
+        /* Repository button styles */
+        .repo-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--button-color);
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+            animation-delay: 1s;
+            box-shadow: 0 0 15px var(--button-glow);
+        }
+
+        .repo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px var(--button-glow);
+        }
+
+        .repo-button i {
+            margin-right: 8px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .video-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .video-container {
+                max-width: 90%;
+            }
         }
     </style>
 </head>
@@ -145,7 +233,28 @@
         <h1 class="robo-title">
             robo<span class="dancing-dash"></span>boy
         </h1>
-        <p class="coming-soon">Coming soon...</p>
+        
+        <div class="video-section">
+            <div class="video-container">
+                <video class="video-frame" controls preload="metadata">
+                    <source src="media/videos/robo-boy/app_functions.webm" type="video/webm">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-title">App Functions</div>
+            </div>
+            
+            <div class="video-container">
+                <video class="video-frame" controls preload="metadata">
+                    <source src="media/videos/robo-boy/theme_custom.webm" type="video/webm">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-title">Theme Customization</div>
+            </div>
+        </div>
+        
+        <a href="https://github.com/tessel-la/robo-boy" target="_blank" class="repo-button">
+            <i class="fab fa-github"></i> View on GitHub
+        </a>
     </div>
     
     <script src="script.js"></script>
