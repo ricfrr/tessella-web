@@ -38,34 +38,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Smooth scroll functionality for scroll indicator
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+        scrollIndicator.addEventListener('click', () => {
+            const projectsSection = document.getElementById('projects');
+            if (projectsSection) {
+                projectsSection.scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }
+        });
+    }
+
     // Cursor dot animation (only on index page)
     const cursorDot = document.getElementById('cursor-dot');
     
     if (!cursorDot) {
-        console.error('Required element #cursor-dot not found!');
+        // This is normal for other pages, so don't show error
         return;
     }
 
-    // Set initial styles
+    // Set initial styles with flat colors
     anime.set(cursorDot, {
-        backgroundColor: '#8A2BE2', // BlueViolet
+        backgroundColor: '#ff6600', // Flat orange
         borderRadius: '50%', // Circle
         scale: 1
     });
     
-    // Create timeline for the vibrant animation
+    // Create timeline for the flat color animation
     const dotTimeline = anime.timeline({
         loop: true,
         easing: 'easeInOutQuad'
     });
     
-    // Add different animation segments
+    // Add different animation segments with flat colors
     
     // 1. Start as a circle, pulse and change color
     dotTimeline.add({
         targets: cursorDot,
         scale: [1, 1.3, 1],
-        backgroundColor: ['#8A2BE2', '#FF1493', '#8A2BE2'], // BlueViolet to DeepPink and back
+        backgroundColor: ['#ff6600', '#00aaff', '#ff6600'], // Flat orange to flat blue and back
         borderRadius: '50%',
         duration: 600
     });
@@ -75,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targets: cursorDot,
         scaleX: [1, 1.3],
         scaleY: [1, 0.3],
-        backgroundColor: ['#8A2BE2', '#00BFFF'], // BlueViolet to DeepSkyBlue
+        backgroundColor: ['#ff6600', '#00cc00'], // Flat orange to flat green
         borderRadius: ['50%', '10px'], // Increased border radius for more rounded appearance
         rotate: [0, 45],
         duration: 400,
@@ -86,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dotTimeline.add({
         targets: cursorDot,
         rotate: [45, -15, 45],
-        backgroundColor: ['#00BFFF', '#32CD32'], // DeepSkyBlue to LimeGreen
+        backgroundColor: ['#00cc00', '#cc3300'], // Flat green to flat red
         duration: 800,
         delay: 50
     });
@@ -97,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scaleX: [1.3, 1],
         scaleY: [0.3, 1],
         borderRadius: ['10px', '15px'], // Keep it rounded
-        backgroundColor: ['#32CD32', '#FF4500'], // LimeGreen to OrangeRed
+        backgroundColor: ['#cc3300', '#ffcc00'], // Flat red to flat yellow
         rotate: [45, 0],
         duration: 400,
         delay: 50
@@ -107,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dotTimeline.add({
         targets: cursorDot,
         scale: [1, 1.1, 0.9, 1],
-        backgroundColor: ['#FF4500', '#FFD700', '#FF4500'], // OrangeRed to Gold and back
+        backgroundColor: ['#ffcc00', '#9900cc', '#ffcc00'], // Flat yellow to flat purple and back
         borderRadius: '15px', // Maintain rounded corners
         rotate: [0, 90, 180, 270, 360],
         duration: 900
@@ -117,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dotTimeline.add({
         targets: cursorDot,
         borderRadius: ['15px', '50%'],
-        backgroundColor: ['#FF4500', '#8A2BE2'], // OrangeRed to BlueViolet
+        backgroundColor: ['#ffcc00', '#ff6600'], // Flat yellow to flat orange
         rotate: 0,
         duration: 300,
         delay: 50

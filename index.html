@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tessel·la</title>
+    <link rel="icon" type="image/png" href="media/tab icon/207144850.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,21 +16,81 @@
             <span class="slider"></span>
         </label>
     </div>
-    <div class="container">
-        <h1 class="title">
-            <span class="letter">t</span>
-            <span class="letter">e</span>
-            <span class="letter">s</span>
-            <span class="letter">s</span>
-            <span class="letter">e</span>
-            <span class="letter">l</span>
-            <a href="about.html" class="dot-container" aria-label="Learn more about tessel·la">
-                <div id="cursor-dot"></div>
-            </a>
-            <span class="letter">l</span>
-            <span class="letter">a</span>
-        </h1>
-    </div>
+    
+    <!-- Main title section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="title">
+                <span class="letter">t</span>
+                <span class="letter">e</span>
+                <span class="letter">s</span>
+                <span class="letter">s</span>
+                <span class="letter">e</span>
+                <span class="letter">l</span>
+                <div class="dot-container">
+                    <div id="cursor-dot"></div>
+                </div>
+                <span class="letter">l</span>
+                <span class="letter">a</span>
+            </h1>
+            
+            <!-- Scroll down indicator -->
+            <div class="scroll-indicator">
+                <div class="scroll-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <span class="scroll-text">projects</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Projects section -->
+    <section class="projects-section" id="projects">
+        <div class="container">
+            <h2 class="section-title">Our Projects</h2>
+            <!-- <p class="section-description">We are a collective of independent developers driven by passion. With joy, we explore the incredible possibilities of technology to craft meaningful and delightful human-machine interactions.</p> -->
+            
+            <!-- Project showcase -->
+            <div class="project-showcase">
+                <div class="project-card">
+                    <div class="project-logo">
+                        <img src="media/projects/robo_boy/logo_rb.jpg" alt="Robo Boy Logo" class="logo-image">
+                    </div>
+                    
+                    <h3 class="project-title">
+                        robo<span class="dancing-dash"></span>boy
+                    </h3>
+                    
+                    <p class="project-description">
+                        A web application for controlling ROS 2 robots, tailored for mobile usage. Inspired by retro handheld consoles.
+                    </p>
+                    
+                    <div class="video-section">
+                        <div class="video-container">
+                            <video class="video-frame" controls preload="metadata">
+                                <source src="media/videos/robo-boy/app_functions.webm" type="video/webm">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-title">App Functions</div>
+                        </div>
+                        
+                        <div class="video-container">
+                            <video class="video-frame" controls preload="metadata">
+                                <source src="media/videos/robo-boy/theme_custom.webm" type="video/webm">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-title">Theme Customization</div>
+                        </div>
+                    </div>
+                    
+                    <a href="https://github.com/tessel-la/robo-boy" target="_blank" class="repo-button">
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="script.js"></script>
 </body>
