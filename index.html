@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>tessel·la — open robotics, retro spirit</title>
+<title>tessel·la</title>
 <meta name="description" content="tessel·la, Building joyful robot experiences." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -611,7 +611,7 @@ function Hero() {
           <span style={{ display:"inline-block" }}>l</span>a
         </h1>
         <p className="hero-sub">
-          A small robotics studio. We build open, friendly tools for the people who actually work with robots.
+          We build open, friendly tools for the people who actually work with robots.
         </p>
         <div className="hero-meta">
           <span><i className="led"/> shipping</span>
@@ -806,7 +806,7 @@ function Projects() {
             <span className="eyebrow">Projects</span>
             <h2>Open tools for<br/>the robot era.</h2>
           </div>
-          <p className="lede">We make small, useful things. Each one is open source — peek inside, fork it, ship it.</p>
+          <p className="lede">We make small, useful things. Each one is open source peek inside, fork it, ship it.</p>
         </div>
 
         <article className="project reveal">
@@ -815,7 +815,7 @@ function Projects() {
             <h3>A handheld console<br/>for ROS&nbsp;2 robots.</h3>
             <p>
               A web app that turns your phone into a retro-handheld controller. Custom gamepads,
-              voice commands, live camera, theme-able visuals — works on any browser, on any robot.
+              voice commands, live camera, theme-able visuals works on any browser, on any robot.
             </p>
             <div className="project-tags">
               <span>custom gamepads</span><span>live camera</span><span>3D viz</span><span>swappable layouts</span><span>themes</span>
@@ -846,7 +846,7 @@ function Projects() {
           <div className="project-meta">
             <span className="num">02 / next</span>
             <h3>Something else<br/>is on the bench.</h3>
-            <p>We're cooking. If you want to know what's next — or want a hand wiring up your own robot — say hello below.</p>
+            <p>We're cooking. If you want to know what's next or want a hand wiring up your own robot say hello below.</p>
             <div className="project-tags"><span>coming soon</span></div>
           </div>
           <div className="media" style={{ background:"transparent", boxShadow:"none", border:"1px dashed var(--hairline)", display:"grid", placeItems:"center" }}>
@@ -888,7 +888,7 @@ function About() {
             ))}
           </ol>
           <div>
-            <p>We started tessel·la because we wanted a controller that felt like a toy and worked like a tool — something you'd actually pull out of your pocket at the demo, not a dashboard that lives behind a VPN.</p>
+            <p>We started tessel·la because we wanted a controller that felt like a toy and worked like a tool something you'd actually pull out of your pocket at the demo, not a dashboard that lives behind a VPN.</p>
             <p>Robo·Boy is the first thing. There will be more. If any of this resonates, the code is open and the door is open.</p>
             <div className="more">
               <a className="btn btn--ghost" href="https://github.com/tessel-la" target="_blank" rel="noopener">
@@ -912,7 +912,7 @@ function Contact() {
     const name    = e.target.name.value.trim();
     const email   = e.target.email.value.trim();
     const message = e.target.message.value.trim();
-    const subject = encodeURIComponent(`tessel·la — message from ${name}`);
+    const subject = encodeURIComponent(`tessel·la  message from ${name}`);
     const body    = encodeURIComponent(`From: ${name} <${email}>\n\n${message}`);
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
     setSent(true);
@@ -927,7 +927,7 @@ function Contact() {
             <span className="eyebrow">Contact</span>
             <h2>Got a robot<br/>you'd like to wire up?</h2>
             <p style={{ marginTop:16, fontSize:16, maxWidth:"44ch" }}>
-              Tell us about it. We answer every message — usually within a day, sometimes from a robot.
+              Tell us about it. We answer every message usually within a day, sometimes from a robot.
             </p>
           </div>
           <form className="contact-form" onSubmit={onSubmit}>
