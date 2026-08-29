@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robo·Boy Documentation · tessel·la</title>
+  <meta name="description" content="Learn how to run Robo-Boy, connect ROS 2 robots, use its built-in tools, and build standalone panels with the Robo-Boy Panel SDK." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="media/projects/robo_boy/logo.png" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to documentation</a>
+
+  <header class="docs-header">
+    <div class="docs-nav">
+      <a class="docs-brand" href="index.html" aria-label="Tessella home">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>tessel·la</span>
+      </a>
+      <div class="docs-nav__meta">
+        <span class="version-pill">Robo·Boy 0.3.1-alpha</span>
+        <a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">GitHub</a>
+        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="docs-hero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--one" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--two" aria-hidden="true"></div>
+    <div class="docs-wrap docs-hero__inner">
+      <div class="docs-hero__copy">
+        <div class="eyebrow"><span></span> Robo·Boy docs</div>
+        <h1>Your robot.<br><em>Within reach.</em></h1>
+        <p>Run a friendly control room for ROS&nbsp;2, then extend it with panels that remain independent of the core application.</p>
+        <div class="hero-actions">
+          <a class="button button--accent" href="#quickstart">Start with Docker <span aria-hidden="true">↓</span></a>
+          <a class="button button--quiet" href="#panel-tutorial">Build a panel <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="console-card" aria-label="Robo-Boy connection overview">
+        <div class="console-card__bar">
+          <span class="console-led"></span>
+          <span>robo·boy / ros 2</span>
+          <span class="console-status">connected</span>
+        </div>
+        <div class="console-screen">
+          <div class="screen-stat">
+            <span>bridge</span>
+            <strong>wss://robot/websocket</strong>
+          </div>
+          <div class="screen-grid">
+            <div><span>panels</span><strong>05 + SDK</strong></div>
+            <div><span>runtime</span><strong>web / desktop</strong></div>
+            <div><span>state</span><strong>local first</strong></div>
+            <div><span>API</span><strong>v1.0.0</strong></div>
+          </div>
+          <div class="signal" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+        <div class="console-controls" aria-hidden="true">
+          <div class="dpad"><i></i><i></i></div>
+          <div class="console-label">open tools<br>real robots</div>
+          <div class="ab-buttons"><i>A</i><i>B</i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mobile-toc-wrap">
+    <label for="mobile-toc">On this page</label>
+    <select id="mobile-toc">
+      <option value="#overview">Overview</option>
+      <option value="#quickstart">Install &amp; run</option>
+      <option value="#connect">Connect ROS 2</option>
+      <option value="#architecture">Architecture</option>
+      <option value="#concepts">Concepts &amp; panels</option>
+      <option value="#sdk">Panel SDK</option>
+      <option value="#lifecycle">Panel lifecycle</option>
+      <option value="#api">Public API</option>
+      <option value="#panel-tutorial">Complete panel tutorial</option>
+      <option value="#recipes">Panel recipes</option>
+      <option value="#testing">Develop &amp; test</option>
+      <option value="#distribution">Package &amp; distribute</option>
+      <option value="#practices">Best practices &amp; stability</option>
+      <option value="#troubleshooting">Troubleshooting</option>
+      <option value="#gaps">SDK gaps</option>
+    </select>
+  </div>
+
+  <div class="docs-shell docs-wrap">
+    <aside class="toc" aria-label="Documentation navigation">
+      <nav>
+        <div class="toc-group">
+          <span class="toc-label">Use Robo·Boy</span>
+          <a href="#overview">Overview</a>
+          <a href="#quickstart">Install &amp; run</a>
+          <a href="#connect">Connect ROS 2</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#concepts">Concepts &amp; panels</a>
+        </div>
+        <div class="toc-group">
+          <span class="toc-label">Build panels</span>
+          <a href="#sdk">Panel SDK</a>
+          <a href="#lifecycle">Panel lifecycle</a>
+          <a href="#api">Public API</a>
+          <a href="#panel-tutorial">Complete tutorial</a>
+          <a href="#recipes">Panel recipes</a>
+          <a href="#testing">Develop &amp; test</a>
+          <a href="#distribution">Distribution</a>
+        </div>
+        <div class="toc-group">
+          <span class="toc-label">Reference</span>
+          <a href="#practices">Practices &amp; stability</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+          <a href="#gaps">SDK gaps</a>
+        </div>
+      </nav>
+      <div class="toc-note">
+        <span>Source of truth</span>
+        <a href="https://github.com/tessel-la/robo-boy/tree/main/panel-sdk" target="_blank" rel="noopener">panel-sdk/ ↗</a>
+      </div>
+    </aside>
+
+    <main id="content" class="docs-content">
+      <section id="overview" class="doc-section">
+        <div class="section-kicker">01 / Meet Robo·Boy</div>
+        <h2>A web and desktop interface for controlling and visualizing ROS&nbsp;2 robots.</h2>
+        <p class="lead">Robo-Boy combines camera streaming, configurable control pads, 3D visualization, behavior-tree editing, TF inspection, and custom themes in one touch-friendly workspace. The web and desktop apps share the same React codebase; the Tauri desktop package is a thin shell and does not bundle ROS.</p>
+
+        <div class="use-grid">
+          <article>
+            <span class="card-index">A</span>
+            <h3>Operate</h3>
+            <p>Drive and monitor a robot from a phone, tablet, laptop, or desktop webview.</p>
+          </article>
+          <article>
+            <span class="card-index">B</span>
+            <h3>Visualize</h3>
+            <p>Inspect cameras, TF, laser scans, point clouds, poses, odometry, and URDF models.</p>
+          </article>
+          <article>
+            <span class="card-index">C</span>
+            <h3>Compose</h3>
+            <p>Build reusable control pads and behavior trees without making a one-off dashboard.</p>
+          </article>
+          <article>
+            <span class="card-index">D</span>
+            <h3>Extend</h3>
+            <p>Ship trusted, standalone ESM panels against a small, versioned, framework-neutral SDK.</p>
+          </article>
+        </div>
+
+        <div class="callout callout--important">
+          <div class="callout-icon">!</div>
+          <div>
+            <strong>Choose the right extension path.</strong>
+            <p>A <b>custom gamepad</b> is an in-app JSON layout made from the built-in joystick, button, D-pad, toggle, slider, camera, plot, and heartbeat components. An <b>external panel</b> is independently built JavaScript, loaded through the Panel SDK. New gamepad component types are internal core development; they are not external SDK panels.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="quickstart" class="doc-section">
+        <div class="section-kicker">02 / Install &amp; run</div>
+        <h2>The shortest route is the complete Docker stack.</h2>
+        <p>Use Docker when you need the frontend, ROS bridge, video server, and same-origin proxy together. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
+
+        <ol class="steps">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Clone and create a trusted local certificate</h3>
+              <div class="code-block" data-language="bash">
+                <pre><code>git clone git@github.com:tessel-la/robo-boy.git
+cd robo-boy
+mkcert -install
+mkdir -p infra/caddy/certs
+mkcert \
+  -key-file infra/caddy/certs/local-key.pem \
+  -cert-file infra/caddy/certs/local-cert.pem \
+  localhost 127.0.0.1 ::1 YOUR_HOST_IP</code></pre>
+              </div>
+              <p>Include the computer's LAN or VPN address as <code>YOUR_HOST_IP</code> when another device will open Robo-Boy.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Select the base ROS configuration and start</h3>
+              <div class="code-block" data-language="bash">
+                <pre><code>cp config/env/no-overlay.env.example .env
+docker compose up -d --build</code></pre>
+              </div>
+              <p>Open <code>https://localhost</code>, or <code>https://YOUR_HOST_IP</code> from a device on the same network.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Stop or inspect the stack</h3>
+              <div class="code-block" data-language="bash">
+                <pre><code>docker compose logs -f app
+docker compose logs -f caddy
+docker compose logs -f ros-stack
+docker compose down</code></pre>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="split-card">
+          <div>
+            <span class="mini-label">Frontend only</span>
+            <h3>UI development</h3>
+            <p>Node.js 20+ and npm are required. ROS, video, and mesh routes need separate services or mocks.</p>
+            <div class="code-block code-block--compact" data-language="bash"><pre><code>npm ci
+npm run dev
+# http://localhost:5173</code></pre></div>
+          </div>
+          <div>
+            <span class="mini-label">Desktop shell</span>
+            <h3>Tauri development</h3>
+            <p>Install Tauri v2 prerequisites and run the ROS stack separately. The desktop app connects directly to its host.</p>
+            <div class="code-block code-block--compact" data-language="bash"><pre><code>docker compose up -d --build ros-stack
+npm ci
+npm run desktop:dev</code></pre></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="connect" class="doc-section">
+        <div class="section-kicker">03 / Connect ROS 2</div>
+        <h2>Robo-Boy talks to ROS through rosbridge.</h2>
+        <p>The ROS stack supplies <code>rosapi</code>, <code>rosbridge</code>, and <code>web_video_server</code>. Robo-Boy discovers topics and interfaces after the shared ROSLIB WebSocket connects.</p>
+
+        <div class="mode-table" role="table" aria-label="Robo-Boy connection modes">
+          <div class="mode-row mode-row--head" role="row">
+            <span>Connection</span><span>What happens</span><span>Use when</span>
+          </div>
+          <div class="mode-row" role="row">
+            <strong>Quick Connect</strong>
+            <span>Uses the current web host's proxy routes. Desktop uses <code>localhost</code>.</span>
+            <span>Robo-Boy and ROS services share a machine.</span>
+          </div>
+          <div class="mode-row" role="row">
+            <strong>Domain ID</strong>
+            <span>Uses the current web host's proxy routes; DDS configuration belongs to the ROS container.</span>
+            <span>The deployment owns ROS discovery settings.</span>
+          </div>
+          <div class="mode-row" role="row">
+            <strong>Host or IP</strong>
+            <span>Uses the selected backend host for rosbridge, video, and mesh endpoints.</span>
+            <span>The robot computer is elsewhere on the LAN or VPN.</span>
+          </div>
+        </div>
+
+        <h3 class="subhead">Default service contract</h3>
+        <div class="endpoint-grid">
+          <div><span>rosbridge</span><code>ws://HOST:9090</code></div>
+          <div><span>video</span><code>http://HOST:8080</code></div>
+          <div><span>meshes</span><code>http://HOST:8000</code></div>
+          <div><span>Ollama</span><code>http://HOST:11434</code></div>
+        </div>
+        <p class="fine-print">On the web, Quick Connect normally resolves these through same-origin <code>/websocket</code>, <code>/video_stream</code>, <code>/mesh_resources</code>, and <code>/ollama</code> routes. Advanced Ports override the first three service ports. Tauri connects directly.</p>
+
+        <h3 class="subhead">DDS and robot-specific interfaces</h3>
+        <p>The <code>ros-stack</code> service uses host networking for DDS discovery. Every container that must discover the same graph needs compatible <code>ROS_DOMAIN_ID</code>, <code>ROS_LOCALHOST_ONLY</code>, and <code>RMW_IMPLEMENTATION</code> settings. Custom messages, services, and actions must be available through a mounted, built overlay workspace.</p>
+        <div class="code-block" data-language="dotenv"><pre><code>ROS_DOMAIN_ID=0
+ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+ROS_STATIC_PEERS=
+RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
+        <p>Use <code>config/env/aerostack.env.example</code> or <code>config/env/manipulator.env.example</code> instead of the no-overlay file for those included integrations. After changing overlays, recreate the service:</p>
+        <div class="code-block" data-language="bash"><pre><code>docker compose up -d --build --force-recreate ros-stack</code></pre></div>
+      </section>
+
+      <section id="architecture" class="doc-section">
+        <div class="section-kicker">04 / Architecture</div>
+        <h2>A frontend-first system with a narrow ROS boundary.</h2>
+        <p>Robo-Boy has no application server or database. The browser or Tauri webview owns the interface, ROSLIB owns the active bridge connection, and browser storage holds serializable local state.</p>
+
+        <div class="architecture-map" aria-label="Robo-Boy architecture flow">
+          <div class="architecture-tier">
+            <span class="architecture-label">Client</span>
+            <div class="architecture-nodes">
+              <div><strong>React shell</strong><small>App + MainControlView</small></div>
+              <div><strong>Feature modules</strong><small>Panels, BT, gamepads, themes</small></div>
+              <div><strong>External panel host</strong><small>SDK v1 + ESM loader</small></div>
+            </div>
+          </div>
+          <div class="architecture-arrow"><span>ROSLIB WebSocket · HTTP media/resources</span></div>
+          <div class="architecture-tier architecture-tier--services">
+            <span class="architecture-label">Services</span>
+            <div class="architecture-nodes">
+              <div><strong>rosapi</strong><small>Graph + schema discovery</small></div>
+              <div><strong>rosbridge</strong><small>ROS over WebSocket</small></div>
+              <div><strong>web_video_server</strong><small>Image streams</small></div>
+            </div>
+          </div>
+          <div class="architecture-arrow"><span>ROS 2 DDS · host network</span></div>
+          <div class="architecture-tier architecture-tier--robot">
+            <span class="architecture-label">Robot</span>
+            <div class="architecture-nodes">
+              <div><strong>Robot nodes</strong><small>Topics, services, actions</small></div>
+              <div><strong>Simulation</strong><small>Optional workspace overlays</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fact-list">
+          <article><span>01</span><div><h3>App shell</h3><p><code>App</code> owns connection-screen transitions and global theme state. <code>MainControlView</code> coordinates the workspace and the single shared ROS connection.</p></div></article>
+          <article><span>02</span><div><h3>Feature ownership</h3><p>Behavior trees, custom gamepads, themes, TF, and 3D visualization keep their logic, persistence, and lifecycle code in focused modules.</p></div></article>
+          <article><span>03</span><div><h3>Persistence</h3><p>Layouts, themes, trees, visualization settings, panel sizing, and external-panel state use versioned browser storage. Live ROS clients and rendering objects are never serialized.</p></div></article>
+          <article><span>04</span><div><h3>Deployment</h3><p>Caddy gives the web app and robot services one origin. Tauri packages only the frontend and connects directly to services on the selected host.</p></div></article>
+        </div>
+      </section>
+
+      <section id="concepts" class="doc-section">
+        <div class="section-kicker">05 / Concepts &amp; built-ins</div>
+        <h2>The workspace is a set of tiles backed by stable panel IDs.</h2>
+        <p>Built-in and compatible external panels are merged into one catalog. The workspace stores panel instances and layout locally; an external tile retains its reverse-domain panel ID so Robo-Boy can show an actionable unavailable state if the deployment later removes that panel.</p>
+
+        <div class="panel-grid">
+          <article><div class="panel-icon">CAM</div><h3>Camera</h3><p>Discovers ROS image topics and renders the selected stream through <code>web_video_server</code>.</p><span>ros · network</span></article>
+          <article><div class="panel-icon">3D</div><h3>3D view</h3><p>Visualizes TF, point clouds, laser scans, pose/odometry data, camera info, and URDF models.</p><span>ros · network · storage</span></article>
+          <article><div class="panel-icon">BT</div><h3>Behavior tree</h3><p>Builds and runs sequence, selector, parallel, action, service, topic, and subscriber nodes.</p><span>ros · network · storage</span></article>
+          <article><div class="panel-icon">TF</div><h3>TF tree</h3><p>Subscribes to live <code>/tf</code> and <code>/tf_static</code> data to inspect the transform hierarchy.</p><span>ros</span></article>
+          <article><div class="panel-icon">PAD</div><h3>Pad controls</h3><p>Loads a configurable control surface with publish, subscribe, camera, plotting, and heartbeat components.</p><span>ros · storage</span></article>
+          <article class="panel-card--external"><div class="panel-icon">ESM</div><h3>External panel</h3><p>Loads a reviewed same-origin module lazily and gives each tile its own activation context and state namespace.</p><span>declared per manifest</span></article>
+        </div>
+
+        <h3 class="subhead">Everyday workflows</h3>
+        <div class="workflow-grid">
+          <div><strong>Custom control pad</strong><p>Open <code>+</code>, clone a template or start empty, place controls, assign ROS topics and mappings, then save or export the versioned JSON.</p></div>
+          <div><strong>3D scene</strong><p>Add visualizations, choose a fixed frame and topics, adjust render options, and rely on local storage for the serialized configuration.</p></div>
+          <div><strong>Behavior tree</strong><p>Discover ROS interfaces, configure nodes, connect the graph, then run in browser-owned mode or opt into a ROS-owned persistent execution.</p></div>
+          <div><strong>Theme</strong><p>Select a built-in palette or create a local custom theme. External panels can consume Robo-Boy CSS variables without importing theme internals.</p></div>
+        </div>
+      </section>
+
+      <section id="sdk" class="doc-section">
+        <div class="section-kicker">06 / Panel SDK</div>
+        <h2>Independent code. Small contract. Trusted boundary.</h2>
+        <p class="lead">The Panel SDK is a type-only package. A panel exports one framework-neutral definition, owns everything below the supplied DOM element, and receives only declared host services. Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
+
+        <div class="boundary-map">
+          <div>
+            <span class="mini-label">Robo-Boy core</span>
+            <strong>Catalog → validate → load → host</strong>
+            <p>Owns metadata and integrity checks, workspace layout, lifecycle, host services, persistence, and tile-local errors.</p>
+          </div>
+          <div class="boundary-plus">+</div>
+          <div>
+            <span class="mini-label">External repository</span>
+            <strong>Source → ESM bundle → release</strong>
+            <p>Owns dependencies, tests, manifest, immutable artifacts, and distribution policy.</p>
+          </div>
+          <div class="boundary-equals">=</div>
+          <div>
+            <span class="mini-label">Installed deployment</span>
+            <strong>Same-origin versioned assets</strong>
+            <p><code>panels/installed.json</code> lists only the releases packaged into that Robo-Boy deployment.</p>
+          </div>
+        </div>
+
+        <div class="callout callout--warning">
+          <div class="callout-icon">⚠</div>
+          <div><strong>v1 panels are trusted, same-realm code.</strong><p>Capabilities shape the supplied API and help deployers review a release; they are not enforceable browser permissions. A panel can access browser globals and affect the page. Stage only reviewed artifacts.</p></div>
+        </div>
+
+        <p>The host owns tile creation, sizing, ordering, saved workspace layouts, and replacement. The panel owns only DOM below its mount element; v1 intentionally exposes no layout-mutation API. Store panel configuration through <code>context.storage</code>, and keep framework/runtime dependencies inside the panel's own bundle.</p>
+
+        <h3 class="subhead">Capability declarations</h3>
+        <div class="capability-list">
+          <div><code>ros</code><span>Supplies the shared <code>ROSLIB.Ros</code>, or <code>null</code> when unavailable.</span></div>
+          <div><code>storage</code><span>Supplies a 64 KiB, instance-owned JSON store.</span></div>
+          <div><code>network</code><span>Declares direct fetch/WebSocket or other network use.</span></div>
+          <div><code>web-bluetooth</code><span>Declares Web Bluetooth use.</span></div>
+          <div><code>web-usb</code><span>Declares WebUSB use.</span></div>
+          <div><code>web-serial</code><span>Declares Web Serial use.</span></div>
+          <div><code>camera</code><span>Declares camera/media capture.</span></div>
+          <div><code>microphone</code><span>Declares microphone/media capture.</span></div>
+        </div>
+      </section>
+
+      <section id="lifecycle" class="doc-section">
+        <div class="section-kicker">07 / Lifecycle</div>
+        <h2>One imported module can create many isolated tile instances.</h2>
+        <div class="lifecycle">
+          <div><span>1</span><strong>Discover</strong><p>Fetch and validate registry JSON. No panel code runs.</p></div>
+          <i aria-hidden="true">→</i>
+          <div><span>2</span><strong>Import</strong><p>Verify SHA-256, then cache the versioned ESM module.</p></div>
+          <i aria-hidden="true">→</i>
+          <div><span>3</span><strong>Activate</strong><p>Create one instance with a tile-specific context.</p></div>
+          <i aria-hidden="true">→</i>
+          <div><span>4</span><strong>Mount</strong><p>Render below the supplied HTML element.</p></div>
+          <i aria-hidden="true">→</i>
+          <div><span>5</span><strong>Pause</strong><p>React to effective visibility through <code>setActive</code>.</p></div>
+          <i aria-hidden="true">→</i>
+          <div><span>6</span><strong>Unmount</strong><p>Release every owned resource, deterministically.</p></div>
+        </div>
+
+        <div class="two-column">
+          <div>
+            <h3>What remounts a panel</h3>
+            <ul class="check-list">
+              <li>The tile or host disappears.</li>
+              <li>The panel manifest/version changes.</li>
+              <li>A required ROS instance changes.</li>
+              <li>The user retries after a lifecycle error.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>What <code>unmount()</code> must release</h3>
+            <ul class="check-list">
+              <li>DOM and browser event listeners.</li>
+              <li>Timers, animation frames, and observers.</li>
+              <li>ROS subscriptions, publishers, services, and actions.</li>
+              <li>Media streams, WebRTC, WebGL, and device connections.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="fine-print"><code>setActive(isActive)</code> is optional; <code>mount</code> and <code>unmount</code> are mandatory. Effective active state combines workspace activity, tile intersection, and document visibility.</p>
+      </section>
+
+      <section id="api" class="doc-section">
+        <div class="section-kicker">08 / Public API 1.0.0</div>
+        <h2>The complete runtime surface fits in a few interfaces.</h2>
+        <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelDefinition {
+  apiVersion: string;
+  id: string;
+  activate(
+    context: RoboBoyPanelContext
+  ): RoboBoyPanelInstance | Promise&lt;RoboBoyPanelInstance&gt;;
+}
+
+interface RoboBoyPanelInstance {
+  mount(container: HTMLElement): void | Promise&lt;void&gt;;
+  setActive?(isActive: boolean): void | Promise&lt;void&gt;;
+  unmount(): void | Promise&lt;void&gt;;
+}
+
+interface RoboBoyPanelContext {
+  readonly panelId: string;
+  readonly instanceId: string;
+  readonly hostVersion: string;
+  readonly capabilities: readonly RoboBoyPanelCapability[];
+  readonly ros: Ros | null;
+  readonly storage: RoboBoyPanelStorage | null;
+  readonly runtime: RoboBoyPanelRuntime;
+  readonly connection: RoboBoyPanelConnection;
+  readonly viewport: RoboBoyPanelViewport;
+  readonly logger: RoboBoyPanelLogger;
+}</code></pre></div>
+
+        <div class="api-table">
+          <div class="api-row api-row--head"><span>Context member</span><span>Type / contract</span><span>Use</span></div>
+          <div class="api-row"><code>panelId</code><span><code>string</code></span><span>Stable manifest/definition ID.</span></div>
+          <div class="api-row"><code>instanceId</code><span><code>string</code></span><span>Unique workspace tile identity.</span></div>
+          <div class="api-row"><code>hostVersion</code><span><code>string</code></span><span>Running Robo-Boy version.</span></div>
+          <div class="api-row"><code>capabilities</code><span>readonly capability array</span><span>Validated declarations from the manifest.</span></div>
+          <div class="api-row"><code>ros</code><span><code>Ros | null</code></span><span>Shared ROSLIB connection when <code>ros</code> is declared.</span></div>
+          <div class="api-row"><code>storage</code><span>store or <code>null</code></span><span>Per-instance JSON state when <code>storage</code> is declared.</span></div>
+          <div class="api-row"><code>runtime</code><span>target + endpoints</span><span>Web/desktop target and rosbridge, video, mesh, Ollama endpoints.</span></div>
+          <div class="api-row"><code>connection</code><span>snapshot + subscribe</span><span>Status and monotonically increasing ROS generation.</span></div>
+          <div class="api-row"><code>viewport</code><span>snapshot + subscribe + fullscreen</span><span>Tile size, visibility, effective activity, fullscreen request.</span></div>
+          <div class="api-row"><code>logger</code><span>debug/info/warn/error</span><span>Panel- and instance-prefixed host logging.</span></div>
+        </div>
+
+        <details class="api-detail">
+          <summary>Runtime, connection, and viewport shapes</summary>
+          <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelRuntime {
+  readonly target: 'web' | 'desktop';
+  readonly endpoints: {
+    readonly rosbridge: string;
+    readonly videoStream: string;
+    readonly meshResources: string;
+    readonly ollama: string;
+  };
+}
+
+interface RoboBoyPanelConnectionSnapshot {
+  readonly status: 'disconnected' | 'connecting' | 'connected';
+  readonly generation: number;
+}
+
+interface RoboBoyPanelConnection {
+  getSnapshot(): RoboBoyPanelConnectionSnapshot;
+  subscribe(
+    listener: (snapshot: RoboBoyPanelConnectionSnapshot) =&gt; void
+  ): () =&gt; void;
+}
+
+interface RoboBoyPanelViewportSnapshot {
+  readonly width: number;
+  readonly height: number;
+  readonly isIntersecting: boolean;
+  readonly isDocumentVisible: boolean;
+  readonly isActive: boolean;
+}
+
+interface RoboBoyPanelViewport {
+  getSnapshot(): RoboBoyPanelViewportSnapshot;
+  subscribe(
+    listener: (snapshot: RoboBoyPanelViewportSnapshot) =&gt; void
+  ): () =&gt; void;
+  requestFullscreen(): Promise&lt;void&gt;;
+}
+
+interface RoboBoyPanelLogger {
+  debug(message: string, ...details: unknown[]): void;
+  info(message: string, ...details: unknown[]): void;
+  warn(message: string, ...details: unknown[]): void;
+  error(message: string, ...details: unknown[]): void;
+}</code></pre></div>
+        </details>
+
+        <details class="api-detail">
+          <summary>Storage contract and limits</summary>
+          <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelStorage {
+  readonly schemaVersion: 1;
+  readonly quotaBytes: number;
+  get&lt;T extends RoboBoyJsonValue&gt;(key: string, fallback: T): T;
+  set(key: string, value: RoboBoyJsonValue): void;
+  remove(key: string): void;
+  sizeBytes(): number;
+}</code></pre></div>
+          <p>Keys are 1–128 characters using letters, numbers, dots, underscores, or dashes. Values must be finite, acyclic, plain JSON no deeper than 20 levels. Each tile has a 64 KiB serialized quota.</p>
+        </details>
+      </section>
+
+      <section id="panel-tutorial" class="doc-section">
+        <div class="section-kicker">09 / Complete panel tutorial</div>
+        <h2>Build a persistent greeting panel from scratch.</h2>
+        <p>This minimal standalone panel uses the real v1 lifecycle and storage API. It has no runtime framework dependency; TypeScript emits a browser-ready ESM file.</p>
+
+        <ol class="steps steps--tutorial">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Create a sibling repository</h3>
+              <div class="code-block" data-language="bash"><pre><code>mkdir my-roboboy-panel
+cd my-roboboy-panel
+mkdir -p src scripts</code></pre></div>
+              <p>For local staging, keep it next to <code>robo-boy/</code> and your panel inventory repository.</p>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Add <code>package.json</code></h3>
+              <div class="code-block" data-language="JSON"><pre><code>{
+  "name": "my-roboboy-panel",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "integrity": "node scripts/print-integrity.mjs"
+  },
+  "devDependencies": {
+    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v1.0.0/tessel-la-roboboy-panel-sdk-1.0.0.tgz",
+    "typescript": "^5.2.2"
+  }
+}</code></pre></div>
+              <div class="code-block code-block--compact" data-language="bash"><pre><code>npm install</code></pre></div>
+              <p>The SDK is distributed as a release tarball, not through the npm registry. Pin it and commit the lockfile.</p>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Configure TypeScript</h3>
+              <div class="code-block" data-language="JSON"><pre><code>{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM"],
+    "strict": true,
+    "declaration": false,
+    "outDir": "dist",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}</code></pre></div>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">4</span>
+            <div>
+              <h3>Implement <code>src/index.ts</code></h3>
+              <div class="code-block" data-language="TypeScript"><pre><code>import type {
+  RoboBoyPanelContext,
+  RoboBoyPanelDefinition,
+} from '@tessel-la/roboboy-panel-sdk';
+
+const activate = (context: RoboBoyPanelContext) =&gt; {
+  let root: HTMLElement | null = null;
+  let button: HTMLButtonElement | null = null;
+  let count = context.storage?.get('greetings', 0) ?? 0;
+
+  const renderCount = () =&gt; {
+    if (button) button.textContent = `Send greeting (${count})`;
+  };
+
+  const sendGreeting = () =&gt; {
+    count += 1;
+    context.storage?.set('greetings', count);
+    context.logger.info(`Greeting ${count} sent.`);
+    renderCount();
+  };
+
+  return {
+    mount(container: HTMLElement) {
+      root = document.createElement('section');
+      root.style.cssText = `
+        height: 100%; display: grid; place-items: center;
+        padding: 24px; box-sizing: border-box;
+        color: var(--text-color, #f5f7fb);
+        background: var(--background-secondary, #252b35);
+      `;
+
+      const content = document.createElement('div');
+      content.style.textAlign = 'center';
+
+      const heading = document.createElement('h2');
+      heading.textContent = 'Hello from outside Robo-Boy';
+
+      button = document.createElement('button');
+      button.type = 'button';
+      button.addEventListener('click', sendGreeting);
+      renderCount();
+
+      content.append(heading, button);
+      root.append(content);
+      container.replaceChildren(root);
+    },
+
+    setActive(isActive: boolean) {
+      root?.toggleAttribute('data-inactive', !isActive);
+    },
+
+    unmount() {
+      button?.removeEventListener('click', sendGreeting);
+      root?.remove();
+      button = null;
+      root = null;
+    },
+  };
+};
+
+const definition: RoboBoyPanelDefinition = {
+  apiVersion: '1.0.0',
+  id: 'com.example.greeting',
+  activate,
+};
+
+export default definition;</code></pre></div>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">5</span>
+            <div>
+              <h3>Add <code>roboboy.panel.json</code></h3>
+              <div class="code-block" data-language="JSON"><pre><code>{
+  "schemaVersion": 1,
+  "id": "com.example.greeting",
+  "name": "Greeting",
+  "description": "A minimal persistent greeting panel.",
+  "version": "1.0.0",
+  "entryPoint": "./dist/index.js",
+  "integrity": "sha256-REPLACE_WITH_THE_GENERATED_BASE64_DIGEST=",
+  "compatibility": {
+    "panelApi": "^1.0.0",
+    "roboboy": ">=0.3.0-0 &lt;1.0.0"
+  },
+  "capabilities": ["storage"],
+  "author": { "name": "Your team" },
+  "repository": "https://github.com/YOUR_ORG/my-roboboy-panel",
+  "tags": ["example"]
+}</code></pre></div>
+              <p>Use a stable lowercase reverse-domain ID you control. The definition, manifest, inventory, and release must all use the same ID and version.</p>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">6</span>
+            <div>
+              <h3>Build and calculate integrity</h3>
+              <p>Create <code>scripts/print-integrity.mjs</code>:</p>
+              <div class="code-block" data-language="JavaScript"><pre><code>import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+
+const bundle = await readFile(new URL('../dist/index.js', import.meta.url));
+console.log(`sha256-${createHash('sha256')
+  .update(bundle)
+  .digest('base64')}`);</code></pre></div>
+              <div class="code-block code-block--compact" data-language="bash"><pre><code>npm run typecheck
+npm run build
+npm run integrity</code></pre></div>
+              <p>Replace the placeholder in the manifest with the complete <code>sha256-...</code> output after every bundle change.</p>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">7</span>
+            <div>
+              <h3>Add the panel to an inventory</h3>
+              <p>Create <code>panels/com.example.greeting.json</code> in a sibling inventory and add its path to <code>catalog.json</code>. For local staging, release URLs can point at the planned immutable release; the ID, version, compatibility, capabilities, and generated integrity must already match the local manifest.</p>
+              <div class="code-block" data-language="JSON"><pre><code>{
+  "schemaVersion": 1,
+  "panels": ["./panels/com.example.greeting.json"]
+}</code></pre></div>
+              <div class="code-block" data-language="JSON"><pre><code>{
+  "schemaVersion": 1,
+  "id": "com.example.greeting",
+  "name": "Greeting",
+  "description": "A minimal persistent greeting panel.",
+  "repository": "https://github.com/YOUR_ORG/my-roboboy-panel",
+  "author": { "name": "Your team" },
+  "latest": {
+    "version": "1.0.0",
+    "compatibility": {
+      "panelApi": "^1.0.0",
+      "roboboy": ">=0.3.0-0 &lt;1.0.0"
+    },
+    "capabilities": ["storage"],
+    "distribution": {
+      "type": "javascript-bundle",
+      "manifestUrl": "https://github.com/YOUR_ORG/my-roboboy-panel/releases/download/v1.0.0/roboboy.panel.json",
+      "bundleUrl": "https://github.com/YOUR_ORG/my-roboboy-panel/releases/download/v1.0.0/index.js",
+      "entryPoint": "index.js",
+      "integrity": "sha256-PASTE_THE_SAME_GENERATED_BASE64_DIGEST="
+    }
+  },
+  "tags": ["example"]
+}</code></pre></div>
+            </div>
+          </li>
+
+          <li>
+            <span class="step-number">8</span>
+            <div>
+              <h3>Stage, load, and use it</h3>
+              <div class="code-block" data-language="bash"><pre><code>cd ../robo-boy
+npm run panels:stage-local -- \
+  --inventory ../my-panel-inventory \
+  --source-root .. \
+  --panel com.example.greeting
+
+npm run dev:panels -- \
+  --inventory ../my-panel-inventory \
+  --source-root .. \
+  --panel com.example.greeting</code></pre></div>
+              <p>Open the workspace, choose <b>Add panel</b>, and select <b>Greeting</b>. Click the button, remove and re-add the tile, and confirm the instance-owned count returns. The normal <code>npm run dev</code> command intentionally keeps the tracked empty panel registry.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="recipes" class="doc-section">
+        <div class="section-kicker">10 / Copy-and-adapt recipes</div>
+        <h2>Patterns for real robot panels.</h2>
+        <p>Panels that construct ROS clients must bundle <code>roslib</code> themselves. The SDK shares the host <code>Ros</code> object, not Robo-Boy's dependency graph.</p>
+
+        <div class="recipe-stack">
+          <details class="recipe" open>
+            <summary><span>ROS</span> Subscribe to a topic</summary>
+            <div class="recipe-body">
+              <div class="code-block" data-language="TypeScript"><pre><code>import ROSLIB from 'roslib';
+
+let topic: ROSLIB.Topic | null = null;
+
+if (context.ros) {
+  topic = new ROSLIB.Topic({
+    ros: context.ros,
+    name: '/battery_state',
+    messageType: 'sensor_msgs/msg/BatteryState',
+    queue_length: 1,
+    throttle_rate: 100,
+  });
+  topic.subscribe((message) =&gt; {
+    // Normalize the unknown message before rendering it.
+    renderBattery(message);
+  });
+}
+
+// In unmount():
+topic?.unsubscribe();
+topic = null;</code></pre></div>
+              <p>Declare <code>ros</code>, tolerate <code>context.ros === null</code>, bound high-rate data, and unsubscribe on teardown. The official Time Series panel applies this pattern.</p>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary><span>ROS</span> Publish a message</summary>
+            <div class="recipe-body">
+              <div class="code-block" data-language="TypeScript"><pre><code>import ROSLIB from 'roslib';
+
+const command = context.ros
+  ? new ROSLIB.Topic({
+      ros: context.ros,
+      name: '/cmd_vel',
+      messageType: 'geometry_msgs/msg/Twist',
+    })
+  : null;
+
+command?.advertise();
+command?.publish(new ROSLIB.Message({
+  linear: { x: 0.2, y: 0, z: 0 },
+  angular: { x: 0, y: 0, z: 0 },
+}));
+
+// In unmount(): stop motion if appropriate, then release.
+command?.unadvertise();</code></pre></div>
+              <p>Match the robot's exact interface definition. For continuous controls, throttle publishing, cancel pending work, and deliberately publish a safe released/stopped state when the panel owns that responsibility.</p>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary><span>STATE</span> Expose settings and persist configuration</summary>
+            <div class="recipe-body">
+              <div class="code-block" data-language="TypeScript"><pre><code>import type { RoboBoyJsonObject } from
+  '@tessel-la/roboboy-panel-sdk';
+
+type Settings = { topic: string; compact: boolean };
+
+const fallback: Settings = {
+  topic: '/battery_state',
+  compact: false,
+};
+
+const stored = context.storage?.get(
+  'settings',
+  fallback as unknown as RoboBoyJsonObject,
+);
+let settings = (stored as unknown as Settings) ?? fallback;
+
+function save(next: Settings) {
+  settings = next;
+  try {
+    context.storage?.set(
+      'settings',
+      next as unknown as RoboBoyJsonObject,
+    );
+  } catch (error) {
+    context.logger.warn('Unable to persist settings.', error);
+  }
+}</code></pre></div>
+              <p>v1 has no host-rendered settings pane. Render controls inside your tile, sanitize loaded data, keep secrets out of storage, and handle quota errors.</p>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary><span>LIVE</span> Pause expensive rendering when hidden</summary>
+            <div class="recipe-body">
+              <div class="code-block" data-language="TypeScript"><pre><code>let frame: number | null = null;
+let active = context.viewport.getSnapshot().isActive;
+
+const draw = () =&gt; {
+  if (!active) return;
+  renderLatestSample();
+  frame = requestAnimationFrame(draw);
+};
+
+const stop = context.viewport.subscribe((snapshot) =&gt; {
+  active = snapshot.isActive;
+  if (active &amp;&amp; frame === null) frame = requestAnimationFrame(draw);
+  if (!active &amp;&amp; frame !== null) cancelAnimationFrame(frame);
+  if (!active) frame = null;
+});
+
+// In unmount():
+stop();
+if (frame !== null) cancelAnimationFrame(frame);</code></pre></div>
+              <p>Use viewport width and height for compact layouts. Use <code>setActive</code> for coarse lifecycle changes and the viewport subscription when size or detailed visibility matters.</p>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary><span>VIDEO</span> Camera and WebRTC panels</summary>
+            <div class="recipe-body">
+              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code>, read <code>context.runtime.endpoints.videoStream</code>, and own its fetch/WebRTC lifecycle. The official WebRTC panel:</p>
+              <ul class="check-list">
+                <li>Discovers ready gateway paths below the restricted <code>/webrtc/_discovery/paths</code> resource.</li>
+                <li>Negotiates WHEP with the browser's native WebRTC API.</li>
+                <li>Stops statistics timers, aborts discovery, closes the remote WHEP session, and clears media on deactivate/unmount.</li>
+                <li>Keeps bearer credentials in memory; it never writes them to panel storage.</li>
+              </ul>
+              <a class="text-link" href="https://github.com/tessel-la/roboboy-webrtc-panel" target="_blank" rel="noopener">Study the complete WebRTC panel ↗</a>
+            </div>
+          </details>
+
+          <details class="recipe">
+            <summary><span>DEVICE</span> Bluetooth or external devices</summary>
+            <div class="recipe-body">
+              <div class="code-block" data-language="TypeScript"><pre><code>let device: BluetoothDevice | null = null;
+
+async function connectFromUserGesture() {
+  device = await navigator.bluetooth.requestDevice({
+    filters: [{ services: ['YOUR_STANDARD_OR_VENDOR_SERVICE_UUID'] }],
+  });
+  const server = await device.gatt?.connect();
+  // Resolve your documented GATT service and characteristics.
+}
+
+// In unmount():
+device?.gatt?.disconnect();
+device = null;</code></pre></div>
+              <p>Declare <code>web-bluetooth</code>. The browser API normally requires HTTPS, compatible hardware/browser support, and a user gesture. Use the exact service and characteristic UUIDs from the device specification; the SDK does not broker or wrap Bluetooth. Apply the same ownership rule to WebUSB and Web Serial.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section id="testing" class="doc-section">
+        <div class="section-kicker">11 / Develop &amp; test</div>
+        <h2>Test the artifact the host will actually import.</h2>
+        <div class="test-lanes">
+          <article><span>01</span><h3>Pure logic</h3><p>Unit-test message normalization, field selection, sizing, state migration, and protocol helpers without a browser.</p></article>
+          <article><span>02</span><h3>Lifecycle</h3><p>Exercise activation, mount, active-state changes, repeated cleanup, missing services, quota errors, and failures.</p></article>
+          <article><span>03</span><h3>Artifact</h3><p>Import <code>dist/index.js</code>; verify its default ID/API, required methods, no unresolved bare imports, and SHA-256.</p></article>
+          <article><span>04</span><h3>Host integration</h3><p>Stage through the inventory and test add, reload, reconnect, hide/show, resize, remove, and retry inside Robo-Boy.</p></article>
+        </div>
+
+        <h3 class="subhead">Local repository layout</h3>
+        <div class="code-block" data-language="text"><pre><code>workspace/
+  robo-boy/                 # host application
+  my-roboboy-panel/        # independent source + dist + manifest
+  my-panel-inventory/      # catalog metadata only</code></pre></div>
+        <p>The local stager scans immediate children below <code>--source-root</code> and matches repositories by manifest ID, not directory name. It verifies bundle, manifest, and inventory metadata before generating an ignored <code>.panel-stage/public/</code> tree.</p>
+
+        <h3 class="subhead">Robo-Boy project checks</h3>
+        <div class="code-block" data-language="bash"><pre><code>npm run lint
+npm run test:run
+npm run build
+npm run e2e</code></pre></div>
+        <p>For Docker development with the known examples, add <code>infra/compose/panels.yml</code>. For a private sibling panel, mount its repository and inventory through an uncommitted deployment-local Compose override.</p>
+      </section>
+
+      <section id="distribution" class="doc-section">
+        <div class="section-kicker">12 / Package &amp; distribute</div>
+        <h2>Publish immutable ESM; install into the deployment.</h2>
+        <div class="distribution-flow">
+          <div><span>Panel repo</span><strong>Build + test</strong><small><code>roboboy.panel.json</code><br><code>dist/index.js</code></small></div>
+          <i>→</i>
+          <div><span>Release</span><strong>Immutable assets</strong><small>Versioned URLs<br>SHA-256 SRI</small></div>
+          <i>→</i>
+          <div><span>Inventory</span><strong>Discoverable metadata</strong><small>Public or private<br>no source/bundles</small></div>
+          <i>→</i>
+          <div><span>Deployment</span><strong>Installed registry</strong><small>Same origin<br>versioned path</small></div>
+        </div>
+
+        <ol class="plain-steps">
+          <li><strong>Bundle every runtime dependency.</strong> The release entry must be browser ESM with no unresolved bare imports. Frameworks such as React, Vue, Three.js, and ROSLIB belong to the panel bundle.</li>
+          <li><strong>Generate and record SHA-256 SRI.</strong> The exact value must agree across bundle, panel manifest, and inventory.</li>
+          <li><strong>Publish a versioned release.</strong> Include the manifest and bundle. Treat assets as append-only.</li>
+          <li><strong>Register metadata separately.</strong> An inventory points at immutable release artifacts; it is not installed state and does not host source.</li>
+          <li><strong>Install for a deployment.</strong> The remote installer downloads selected releases, verifies identity and hashes, then atomically replaces <code>installed.json</code>. The browser imports only same-origin staged code.</li>
+        </ol>
+
+        <div class="code-block" data-language="bash"><pre><code># Official remote inventory overlay
+docker compose \
+  -f docker-compose.yml \
+  -f infra/compose/panels.remote.yml \
+  build app panel-installer
+
+docker compose \
+  -f docker-compose.yml \
+  -f infra/compose/panels.remote.yml \
+  up -d</code></pre></div>
+        <p>Private inventories can use HTTPS release storage and an authorization value supplied through a named environment variable. Credentials stay on the installer side and are never sent to the browser. Duplicate IDs across configured inventories are rejected.</p>
+      </section>
+
+      <section id="practices" class="doc-section">
+        <div class="section-kicker">13 / Best practices &amp; stability</div>
+        <h2>Build against the contract, not the host implementation.</h2>
+
+        <div class="stability-grid">
+          <div class="stable-card">
+            <span class="status-label status-label--stable">Public / versioned</span>
+            <h3>Safe dependencies</h3>
+            <ul class="check-list">
+              <li><code>panel-sdk/index.d.ts</code> and API version <code>1.0.0</code>.</li>
+              <li>The definition, context, lifecycle, runtime, storage, connection, viewport, and logger interfaces.</li>
+              <li>The manifest fields and installed-registry contract documented for v1.</li>
+              <li>CSS custom properties as optional theme hints with your own fallbacks.</li>
+            </ul>
+          </div>
+          <div class="internal-card">
+            <span class="status-label status-label--internal">Internal / changeable</span>
+            <h3>Do not couple to these</h3>
+            <ul class="check-list">
+              <li>React components, hooks, application stores, and feature-module files.</li>
+              <li><code>MainControlView</code>, <code>ExternalPanelHost</code>, loader/registry internals, or localStorage keys.</li>
+              <li>Built-in panel adapters and custom-gamepad implementation details.</li>
+              <li>Robo-Boy's bundled copy of ROSLIB, Three.js, or any other dependency.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="practice-grid">
+          <article><h3>Own resources</h3><p>Create clients inside the instance that cleans them up. Make <code>unmount</code> safe to call after partial startup and more than once.</p></article>
+          <article><h3>Defend state</h3><p>Version and sanitize your settings. Store only plain JSON. Keep live objects, handles, credentials, and large sample buffers in memory.</p></article>
+          <article><h3>Respect activity</h3><p>Stop decoding, polling, plotting, and device traffic while inactive. Design from a small tile upward using viewport snapshots.</p></article>
+          <article><h3>Handle reconnects</h3><p>Watch connection generation. Discard events from stale clients and rebuild clients when the shared ROS instance changes.</p></article>
+          <article><h3>Keep releases lean</h3><p>Bundle only what the panel needs and lazy-load optional heavy features. Shared host dependencies are deliberately not part of v1.</p></article>
+          <article><h3>Fail locally</h3><p>Use the supplied logger, provide meaningful empty/error states, and allow exceptions to remain attributable to your versioned bundle.</p></article>
+        </div>
+      </section>
+
+      <section id="troubleshooting" class="doc-section">
+        <div class="section-kicker">14 / Troubleshooting</div>
+        <h2>Start at the boundary that is failing.</h2>
+        <div class="troubleshooting-list">
+          <details open>
+            <summary>Robo-Boy loads, but ROS never connects</summary>
+            <div><p>Check <code>docker compose logs ros-stack</code>, confirm rosbridge listens on the selected/default port, and verify the web proxy or direct host is reachable. Every DDS participant must use compatible domain, discovery, and middleware settings.</p></div>
+          </details>
+          <details>
+            <summary>The phone rejects HTTPS or browser device APIs</summary>
+            <div><p>Regenerate the mkcert certificate with the machine's current LAN/VPN IP and trust the mkcert CA on the client device. Camera, Bluetooth, and similar browser APIs generally require a secure context.</p></div>
+          </details>
+          <details>
+            <summary>Custom ROS messages are missing</summary>
+            <div><p>Mount a built install workspace under <code>/overlay_ws/&lt;name&gt;</code>, recreate <code>ros-stack</code>, and inspect its logs for the activation line. Generated hooks may also require their original build/source paths.</p></div>
+          </details>
+          <details>
+            <summary>A panel does not appear in Add panel</summary>
+            <div><p>Normal <code>dev</code> and <code>build</code> use an empty tracked registry. Run a panel-aware command. Check ID uniqueness, manifest shape, compatibility ranges, same-origin versioned entry point, registry size, and the browser console for registry issues.</p></div>
+          </details>
+          <details>
+            <summary>Local panel staging fails</summary>
+            <div><p>Confirm the panel and inventory are immediate siblings below <code>--source-root</code>. The manifest ID, version, compatibility, capabilities, and integrity must match the inventory. Rebuild, regenerate the digest, and update both records.</p></div>
+          </details>
+          <details>
+            <summary>The tile says the panel could not start</summary>
+            <div><p>Inspect the panel-prefixed console error. Common causes are an invalid default export, mismatched ID/API version, rejected integrity, unresolved runtime imports, failure in <code>activate</code>/<code>mount</code>, or a missing capability/service. Fix the artifact and publish/stage a new immutable version.</p></div>
+          </details>
+          <details>
+            <summary>State fails to save</summary>
+            <div><p>Declare <code>storage</code>; validate keys and plain JSON values; avoid cycles, non-finite numbers, deep nesting, and the 64 KiB per-instance limit. Browser storage is isolated by origin and can be unavailable or full.</p></div>
+          </details>
+          <details>
+            <summary>Video, plots, or WebGL keep consuming resources</summary>
+            <div><p>React to effective activity, unsubscribe high-rate topics, cancel animation frames, stop media tracks/timers, close peer/device connections, and dispose rendering resources in <code>unmount</code>.</p></div>
+          </details>
+        </div>
+      </section>
+
+      <section id="gaps" class="doc-section doc-section--last">
+        <div class="section-kicker">15 / Known gaps</div>
+        <h2>What the v1 SDK deliberately does not promise yet.</h2>
+        <p>These are current platform boundaries found in the SDK, host loader, and project documentation—not hidden APIs to work around.</p>
+        <div class="gap-list">
+          <article><span>01</span><div><h3>No installation UI</h3><p>Install, update, removal, and panel selection are deployment-managed. There is no rollback UI, scheduled update policy, revocation service, or garbage collector.</p></div></article>
+          <article><span>02</span><div><h3>No untrusted sandbox</h3><p>Same-realm code can access browser globals. Capabilities are declarations, not enforcement. An iframe/worker protocol with brokered APIs would be required for untrusted panels.</p></div></article>
+          <article><span>03</span><div><h3>No host settings surface</h3><p>Panels render their own settings inside the tile. There is no standardized settings schema, secret store, notifications API, or application-level command surface.</p></div></article>
+          <article><span>04</span><div><h3>Single-bundle remote installer</h3><p>The remote installer rejects extra manifest assets until inventory metadata defines immutable URLs for every asset.</p></div></article>
+          <article><span>05</span><div><h3>No shared runtime dependencies</h3><p>Panel authors bundle ROSLIB and any framework themselves. This preserves independence but can duplicate code across panels.</p></div></article>
+          <article><span>06</span><div><h3>Integrity is not identity</h3><p>SHA-256 detects drift but does not authenticate a publisher. Signing, inventory review policy, transactional rollback metadata, and revocation remain future hardening work.</p></div></article>
+          <article><span>07</span><div><h3>Best-effort runtime isolation</h3><p>Lifecycle failures are tile-local and attributable bundle errors are caught, but arbitrary synchronous panel code can still block the main thread or mutate global state.</p></div></article>
+          <article><span>08</span><div><h3>Raw ROS, few convenience APIs</h3><p>The shared ROS object supports robot-specific use cases, but the SDK currently offers no narrower topic/service/action helpers or host-owned schema discovery service.</p></div></article>
+        </div>
+
+        <div class="next-card">
+          <div>
+            <span class="eyebrow"><span></span> Keep exploring</span>
+            <h3>Read the implementation beside the contract.</h3>
+            <p>The SDK definition, external-panel guide, and three standalone reference panels are the strongest source material for panel authors.</p>
+          </div>
+          <div class="next-links">
+            <a href="https://github.com/tessel-la/robo-boy/blob/main/docs/external-panels.md" target="_blank" rel="noopener">External panel guide <span>↗</span></a>
+            <a href="https://github.com/tessel-la/robo-boy-hello-panel" target="_blank" rel="noopener">Hello panel <span>↗</span></a>
+            <a href="https://github.com/tessel-la/robo-boy-timeseries-panel" target="_blank" rel="noopener">Time Series panel <span>↗</span></a>
+            <a href="https://github.com/tessel-la/robo-boy-webrtc-panel" target="_blank" rel="noopener">WebRTC panel <span>↗</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="docs-footer">
+    <div class="docs-wrap docs-footer__inner">
+      <a class="docs-brand" href="index.html"><span class="brand-dot"></span><span>tessel·la</span></a>
+      <p>Open tools for the people who work with robots.</p>
+      <div><a href="index.html">Home</a><a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">Robo·Boy</a><a href="#overview">Top ↑</a></div>
+    </div>
+  </footer>
+
+  <script src="docs.js"></script>
+</body>
+</html>

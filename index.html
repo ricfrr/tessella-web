@@ -584,6 +584,7 @@ function Header({ theme, setTheme }) {
         </a>
         <ul className="nav-links">
           <li><a href="#projects">Projects</a></li>
+          <li className="always"><a href="docs.html">Docs</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
           <li className="always">
@@ -821,8 +822,11 @@ function Projects() {
               <span>custom gamepads</span><span>live camera</span><span>3D viz</span><span>swappable layouts</span><span>themes</span>
             </div>
             <div className="project-cta">
-              <a className="btn btn--accent" href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">
-                <Icon.github/> robo-boy
+              <a className="btn btn--accent" href="docs.html">
+                Read the docs <Icon.arrow/>
+              </a>
+              <a className="btn btn--ghost" href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">
+                <Icon.github/> Source
               </a>
               <button className="btn btn--ghost" onClick={() => { play(); document.querySelector(".project .media").scrollIntoView({ behavior:"smooth", block:"center" }); }}>
                 Watch teaser <Icon.arrow/>
@@ -842,7 +846,7 @@ function Projects() {
           </div>
         </article>
 
-        
+
       </div>
     </section>
   );
@@ -945,6 +949,7 @@ function Footer() {
           <span>© {new Date().getFullYear()} · tessel·la</span>
         </div>
         <div className="footer-links">
+          <a href="docs.html">Docs</a>
           <a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">Robo·Boy</a>
           <a href="https://github.com/tessel-la" target="_blank" rel="noopener">GitHub</a>
           <a href="#contact">Contact</a>
