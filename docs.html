@@ -60,7 +60,7 @@
             <div><span>panels</span><strong>05 + SDK</strong></div>
             <div><span>runtime</span><strong>web / desktop</strong></div>
             <div><span>state</span><strong>local first</strong></div>
-            <div><span>API</span><strong>v1.0.0</strong></div>
+            <div><span>API</span><strong>v2.0.0</strong></div>
           </div>
           <div class="signal" aria-hidden="true">
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
@@ -293,7 +293,7 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
             <div class="architecture-nodes">
               <div><strong>React shell</strong><small>App + MainControlView</small></div>
               <div><strong>Feature modules</strong><small>Panels, BT, gamepads, themes</small></div>
-              <div><strong>External panel host</strong><small>SDK v1 + ESM loader</small></div>
+              <div><strong>External panel host</strong><small>SDK v2 + sandbox broker</small></div>
             </div>
           </div>
           <div class="architecture-arrow"><span>ROSLIB WebSocket · HTTP media/resources</span></div>
@@ -349,13 +349,13 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
       <section id="sdk" class="doc-section">
         <div class="section-kicker">06 / Panel SDK</div>
         <h2>Independent code. Small contract. Trusted boundary.</h2>
-        <p class="lead">The Panel SDK is a type-only package. A panel exports one framework-neutral definition, owns everything below the supplied DOM element, and receives only declared host services. Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
+        <p class="lead">The Panel SDK is a type-only package. A panel exports one framework-neutral definition, runs in its own opaque-origin iframe, owns everything below the supplied DOM element, and receives only declared host services over a private channel. Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
 
         <div class="boundary-map">
           <div>
             <span class="mini-label">Robo-Boy core</span>
-            <strong>Catalog → validate → load → host</strong>
-            <p>Owns metadata and integrity checks, workspace layout, lifecycle, host services, persistence, and tile-local errors.</p>
+            <strong>Catalog → verify → sandbox → broker</strong>
+            <p>Owns metadata and integrity checks, workspace layout, iframe lifecycle, permission brokers, persistence, and tile-local errors.</p>
           </div>
           <div class="boundary-plus">+</div>
           <div>
@@ -373,22 +373,39 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
 
         <div class="callout callout--warning">
           <div class="callout-icon">⚠</div>
-          <div><strong>v1 panels are trusted, same-realm code.</strong><p>Capabilities shape the supplied API and help deployers review a release; they are not enforceable browser permissions. A panel can access browser globals and affect the page. Stage only reviewed artifacts.</p></div>
+          <div><strong>v2 minimizes access; it is not a hostile-code boundary.</strong><p>Each panel runs without <code>allow-same-origin</code>, direct HTTP is blocked by sandbox CSP, and host services enforce manifest permissions. A panel can still consume CPU or misuse data explicitly granted to it, so install only reviewed artifacts.</p></div>
         </div>
 
-        <p>The host owns tile creation, sizing, ordering, saved workspace layouts, and replacement. The panel owns only DOM below its mount element; v1 intentionally exposes no layout-mutation API. Store panel configuration through <code>context.storage</code>, and keep framework/runtime dependencies inside the panel's own bundle.</p>
+        <p>The host owns tile creation, sizing, ordering, saved workspace layouts, and replacement. The panel owns only DOM below its mount element; v2 exposes no parent-page or layout-mutation API. Store panel configuration through <code>context.storage</code>, and keep framework/runtime dependencies inside the panel's own bundle.</p>
 
         <h3 class="subhead">Capability declarations</h3>
         <div class="capability-list">
-          <div><code>ros</code><span>Supplies the shared <code>ROSLIB.Ros</code>, or <code>null</code> when unavailable.</span></div>
+          <div><code>ros</code><span>Supplies brokered discovery, topic selection, subscribe, publish, and service calls constrained by <code>permissions.ros</code>.</span></div>
           <div><code>storage</code><span>Supplies a 64 KiB, instance-owned JSON store.</span></div>
-          <div><code>network</code><span>Declares direct fetch/WebSocket or other network use.</span></div>
+          <div><code>network</code><span>Supplies credential-free brokered fetch and explicitly approved host endpoints constrained by <code>permissions.network</code>.</span></div>
           <div><code>web-bluetooth</code><span>Declares Web Bluetooth use.</span></div>
           <div><code>web-usb</code><span>Declares WebUSB use.</span></div>
           <div><code>web-serial</code><span>Declares Web Serial use.</span></div>
           <div><code>camera</code><span>Declares camera/media capture.</span></div>
           <div><code>microphone</code><span>Declares microphone/media capture.</span></div>
         </div>
+
+        <h3 class="subhead">Permission declarations</h3>
+        <div class="code-block" data-language="JSON"><pre><code>{
+  "capabilities": ["ros", "network"],
+  "permissions": {
+    "ros": {
+      "selectTopic": true,
+      "publish": ["/cmd_vel"],
+      "services": ["/robot/reset"]
+    },
+    "network": {
+      "origins": ["https://telemetry.example.com"],
+      "hostEndpoints": ["videoStream"]
+    }
+  }
+}</code></pre></div>
+        <p>ROS and network capabilities require matching permission blocks. Static topic/service patterns are checked for every operation. <code>selectTopic</code> opens a trusted Robo-Boy picker and grants only the chosen topic to that tile; panels never receive the unfiltered graph. Brokered network requests omit ambient browser credentials and revalidate redirects.</p>
       </section>
 
       <section id="lifecycle" class="doc-section">
@@ -397,9 +414,9 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
         <div class="lifecycle">
           <div><span>1</span><strong>Discover</strong><p>Fetch and validate registry JSON. No panel code runs.</p></div>
           <i aria-hidden="true">→</i>
-          <div><span>2</span><strong>Import</strong><p>Verify SHA-256, then cache the versioned ESM module.</p></div>
+          <div><span>2</span><strong>Sandbox</strong><p>Verify SHA-256, create an opaque iframe, and transfer source over a private channel.</p></div>
           <i aria-hidden="true">→</i>
-          <div><span>3</span><strong>Activate</strong><p>Create one instance with a tile-specific context.</p></div>
+          <div><span>3</span><strong>Activate</strong><p>Import the ESM in the sandbox and create one instance with brokered services.</p></div>
           <i aria-hidden="true">→</i>
           <div><span>4</span><strong>Mount</strong><p>Render below the supplied HTML element.</p></div>
           <i aria-hidden="true">→</i>
@@ -423,16 +440,16 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
             <ul class="check-list">
               <li>DOM and browser event listeners.</li>
               <li>Timers, animation frames, and observers.</li>
-              <li>ROS subscriptions, publishers, services, and actions.</li>
+              <li>Brokered ROS subscriptions and pending requests.</li>
               <li>Media streams, WebRTC, WebGL, and device connections.</li>
             </ul>
           </div>
         </div>
-        <p class="fine-print"><code>setActive(isActive)</code> is optional; <code>mount</code> and <code>unmount</code> are mandatory. Effective active state combines workspace activity, tile intersection, and document visibility.</p>
+        <p class="fine-print"><code>setActive(isActive)</code> is optional; <code>mount</code> and <code>unmount</code> are mandatory. Effective active state combines workspace activity, tile intersection, and document visibility. Removing the iframe terminates the panel realm even if cleanup fails.</p>
       </section>
 
       <section id="api" class="doc-section">
-        <div class="section-kicker">08 / Public API 1.0.0</div>
+        <div class="section-kicker">08 / Public API 2.0.0</div>
         <h2>The complete runtime surface fits in a few interfaces.</h2>
         <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelDefinition {
   apiVersion: string;
@@ -451,13 +468,14 @@ interface RoboBoyPanelInstance {
 interface RoboBoyPanelContext {
   readonly panelId: string;
   readonly instanceId: string;
-  readonly hostVersion: string;
   readonly capabilities: readonly RoboBoyPanelCapability[];
-  readonly ros: Ros | null;
+  readonly ros: RoboBoyPanelRos | null;
   readonly storage: RoboBoyPanelStorage | null;
+  readonly network: RoboBoyPanelNetwork | null;
   readonly runtime: RoboBoyPanelRuntime;
   readonly connection: RoboBoyPanelConnection;
   readonly viewport: RoboBoyPanelViewport;
+  readonly theme: RoboBoyPanelTheme;
   readonly logger: RoboBoyPanelLogger;
 }</code></pre></div>
 
@@ -465,13 +483,14 @@ interface RoboBoyPanelContext {
           <div class="api-row api-row--head"><span>Context member</span><span>Type / contract</span><span>Use</span></div>
           <div class="api-row"><code>panelId</code><span><code>string</code></span><span>Stable manifest/definition ID.</span></div>
           <div class="api-row"><code>instanceId</code><span><code>string</code></span><span>Unique workspace tile identity.</span></div>
-          <div class="api-row"><code>hostVersion</code><span><code>string</code></span><span>Running Robo-Boy version.</span></div>
           <div class="api-row"><code>capabilities</code><span>readonly capability array</span><span>Validated declarations from the manifest.</span></div>
-          <div class="api-row"><code>ros</code><span><code>Ros | null</code></span><span>Shared ROSLIB connection when <code>ros</code> is declared.</span></div>
+          <div class="api-row"><code>ros</code><span>broker or <code>null</code></span><span>Permission-checked JSON ROS operations when <code>ros</code> is declared.</span></div>
           <div class="api-row"><code>storage</code><span>store or <code>null</code></span><span>Per-instance JSON state when <code>storage</code> is declared.</span></div>
-          <div class="api-row"><code>runtime</code><span>target + endpoints</span><span>Web/desktop target and rosbridge, video, mesh, Ollama endpoints.</span></div>
+          <div class="api-row"><code>network</code><span>broker or <code>null</code></span><span>Allowlisted, credential-free fetch and approved named host endpoints.</span></div>
+          <div class="api-row"><code>runtime</code><span><code>web | desktop</code></span><span>Current host target; the complete endpoint map is intentionally private.</span></div>
           <div class="api-row"><code>connection</code><span>snapshot + subscribe</span><span>Status and monotonically increasing ROS generation.</span></div>
           <div class="api-row"><code>viewport</code><span>snapshot + subscribe + fullscreen</span><span>Tile size, visibility, effective activity, fullscreen request.</span></div>
+          <div class="api-row"><code>theme</code><span>snapshot + subscribe</span><span>Light/dark state and the reviewed public CSS token set.</span></div>
           <div class="api-row"><code>logger</code><span>debug/info/warn/error</span><span>Panel- and instance-prefixed host logging.</span></div>
         </div>
 
@@ -479,12 +498,6 @@ interface RoboBoyPanelContext {
           <summary>Runtime, connection, and viewport shapes</summary>
           <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelRuntime {
   readonly target: 'web' | 'desktop';
-  readonly endpoints: {
-    readonly rosbridge: string;
-    readonly videoStream: string;
-    readonly meshResources: string;
-    readonly ollama: string;
-  };
 }
 
 interface RoboBoyPanelConnectionSnapshot {
@@ -524,6 +537,47 @@ interface RoboBoyPanelLogger {
         </details>
 
         <details class="api-detail">
+          <summary>Brokered ROS and network shapes</summary>
+          <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelRos {
+  getTopics(): Promise&lt;RoboBoyRosTopic[]&gt;;
+  selectTopic(options?: { currentTopic?: string }): Promise&lt;RoboBoyRosTopic&gt;;
+  subscribe(
+    options: RoboBoyRosSubscriptionOptions,
+    listener: (message: RoboBoyJsonObject) =&gt; void
+  ): Promise&lt;RoboBoyRosSubscription&gt;;
+  publish(options: RoboBoyRosPublishOptions): Promise&lt;void&gt;;
+  callService(options: RoboBoyRosServiceOptions): Promise&lt;RoboBoyJsonObject&gt;;
+}
+
+interface RoboBoyPanelNetwork {
+  readonly endpoints: Partial&lt;Record&lt;'videoStream', string&gt;&gt;;
+  fetch(
+    url: string,
+    request?: RoboBoyPanelNetworkRequest
+  ): Promise&lt;RoboBoyPanelNetworkResponse&gt;;
+}</code></pre></div>
+          <p>ROS permissions can allow filtered discovery, a trusted host topic picker, subscription patterns, publish patterns, and services. Network permissions allow exact HTTPS origins, <code>self</code>, <code>https:</code>, or named host endpoints. The broker rechecks every operation and redirect.</p>
+        </details>
+
+        <details class="api-detail">
+          <summary>Theme contract</summary>
+          <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelThemeSnapshot {
+  readonly colorScheme: 'light' | 'dark';
+  readonly tokens: Readonly&lt;
+    Partial&lt;Record&lt;RoboBoyPanelThemeToken, string&gt;&gt;
+  &gt;;
+}
+
+interface RoboBoyPanelTheme {
+  getSnapshot(): RoboBoyPanelThemeSnapshot;
+  subscribe(
+    listener: (snapshot: RoboBoyPanelThemeSnapshot) =&gt; void
+  ): () =&gt; void;
+}</code></pre></div>
+          <p>Robo-Boy also writes the public tokens into the sandbox as CSS custom properties. Prefer variables such as <code>--background-color</code>, <code>--card-bg</code>, <code>--text-color</code>, <code>--border-color</code>, <code>--primary-color</code>, and <code>--font-family-ui</code>.</p>
+        </details>
+
+        <details class="api-detail">
           <summary>Storage contract and limits</summary>
           <div class="code-block" data-language="TypeScript"><pre><code>interface RoboBoyPanelStorage {
   readonly schemaVersion: 1;
@@ -540,7 +594,7 @@ interface RoboBoyPanelLogger {
       <section id="panel-tutorial" class="doc-section">
         <div class="section-kicker">09 / Complete panel tutorial</div>
         <h2>Build a persistent greeting panel from scratch.</h2>
-        <p>This minimal standalone panel uses the real v1 lifecycle and storage API. It has no runtime framework dependency; TypeScript emits a browser-ready ESM file.</p>
+        <p>This minimal standalone panel uses the v2 sandbox lifecycle and brokered storage API. It has no runtime framework dependency; TypeScript emits a browser-ready ESM file.</p>
 
         <ol class="steps steps--tutorial">
           <li>
@@ -550,7 +604,7 @@ interface RoboBoyPanelLogger {
               <div class="code-block" data-language="bash"><pre><code>mkdir my-roboboy-panel
 cd my-roboboy-panel
 mkdir -p src scripts</code></pre></div>
-              <p>For local staging, keep it next to <code>robo-boy/</code> and your panel inventory repository.</p>
+              <p>For local staging, keep it next to <code>robo-boy/</code>. A local desired-state source points at the repository explicitly; it does not scan sibling projects.</p>
             </div>
           </li>
 
@@ -560,7 +614,7 @@ mkdir -p src scripts</code></pre></div>
               <h3>Add <code>package.json</code></h3>
               <div class="code-block" data-language="JSON"><pre><code>{
   "name": "my-roboboy-panel",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -568,7 +622,7 @@ mkdir -p src scripts</code></pre></div>
     "integrity": "node scripts/print-integrity.mjs"
   },
   "devDependencies": {
-    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v1.0.0/tessel-la-roboboy-panel-sdk-1.0.0.tgz",
+    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v2.0.0/tessel-la-roboboy-panel-sdk-2.0.0.tgz",
     "typescript": "^5.2.2"
   }
 }</code></pre></div>
@@ -662,7 +716,7 @@ const activate = (context: RoboBoyPanelContext) =&gt; {
 };
 
 const definition: RoboBoyPanelDefinition = {
-  apiVersion: '1.0.0',
+  apiVersion: '2.0.0',
   id: 'com.example.greeting',
   activate,
 };
@@ -680,11 +734,11 @@ export default definition;</code></pre></div>
   "id": "com.example.greeting",
   "name": "Greeting",
   "description": "A minimal persistent greeting panel.",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "entryPoint": "./dist/index.js",
   "integrity": "sha256-REPLACE_WITH_THE_GENERATED_BASE64_DIGEST=",
   "compatibility": {
-    "panelApi": "^1.0.0",
+    "panelApi": "^2.0.0",
     "roboboy": ">=0.3.0-0 &lt;1.0.0"
   },
   "capabilities": ["storage"],
@@ -692,7 +746,7 @@ export default definition;</code></pre></div>
   "repository": "https://github.com/YOUR_ORG/my-roboboy-panel",
   "tags": ["example"]
 }</code></pre></div>
-              <p>Use a stable lowercase reverse-domain ID you control. The definition, manifest, inventory, and release must all use the same ID and version.</p>
+              <p>Use a stable lowercase reverse-domain ID you control. The definition, manifest, desired-state selection, and published catalog entry must agree on identity and compatibility.</p>
             </div>
           </li>
 
@@ -718,35 +772,23 @@ npm run integrity</code></pre></div>
           <li>
             <span class="step-number">7</span>
             <div>
-              <h3>Add the panel to an inventory</h3>
-              <p>Create <code>panels/com.example.greeting.json</code> in a sibling inventory and add its path to <code>catalog.json</code>. For local staging, release URLs can point at the planned immutable release; the ID, version, compatibility, capabilities, and generated integrity must already match the local manifest.</p>
+              <h3>Create the desired-state configuration</h3>
+              <p>Create an ignored <code>config/panel-sources.json</code> inside <code>robo-boy/</code>. Schema v2 uses typed sources and explicit selection; local development does not require an inventory entry.</p>
               <div class="code-block" data-language="JSON"><pre><code>{
-  "schemaVersion": 1,
-  "panels": ["./panels/com.example.greeting.json"]
-}</code></pre></div>
-              <div class="code-block" data-language="JSON"><pre><code>{
-  "schemaVersion": 1,
-  "id": "com.example.greeting",
-  "name": "Greeting",
-  "description": "A minimal persistent greeting panel.",
-  "repository": "https://github.com/YOUR_ORG/my-roboboy-panel",
-  "author": { "name": "Your team" },
-  "latest": {
-    "version": "1.0.0",
-    "compatibility": {
-      "panelApi": "^1.0.0",
-      "roboboy": ">=0.3.0-0 &lt;1.0.0"
-    },
-    "capabilities": ["storage"],
-    "distribution": {
-      "type": "javascript-bundle",
-      "manifestUrl": "https://github.com/YOUR_ORG/my-roboboy-panel/releases/download/v1.0.0/roboboy.panel.json",
-      "bundleUrl": "https://github.com/YOUR_ORG/my-roboboy-panel/releases/download/v1.0.0/index.js",
-      "entryPoint": "index.js",
-      "integrity": "sha256-PASTE_THE_SAME_GENERATED_BASE64_DIGEST="
+  "schemaVersion": 2,
+  "sources": [
+    {
+      "type": "local",
+      "name": "development",
+      "root": "../..",
+      "rootEnv": "ROBOBOY_PANEL_WORKSPACE",
+      "repositories": ["my-roboboy-panel"]
     }
-  },
-  "tags": ["example"]
+  ],
+  "selection": {
+    "mode": "include",
+    "panelIds": ["com.example.greeting"]
+  }
 }</code></pre></div>
             </div>
           </li>
@@ -757,14 +799,10 @@ npm run integrity</code></pre></div>
               <h3>Stage, load, and use it</h3>
               <div class="code-block" data-language="bash"><pre><code>cd ../robo-boy
 npm run panels:stage-local -- \
-  --inventory ../my-panel-inventory \
-  --source-root .. \
-  --panel com.example.greeting
+  --config config/panel-sources.json
 
 npm run dev:panels -- \
-  --inventory ../my-panel-inventory \
-  --source-root .. \
-  --panel com.example.greeting</code></pre></div>
+  --config config/panel-sources.json</code></pre></div>
               <p>Open the workspace, choose <b>Add panel</b>, and select <b>Greeting</b>. Click the button, remove and re-add the tile, and confirm the instance-owned count returns. The normal <code>npm run dev</code> command intentionally keeps the tracked empty panel registry.</p>
             </div>
           </li>
@@ -774,59 +812,51 @@ npm run dev:panels -- \
       <section id="recipes" class="doc-section">
         <div class="section-kicker">10 / Copy-and-adapt recipes</div>
         <h2>Patterns for real robot panels.</h2>
-        <p>Panels that construct ROS clients must bundle <code>roslib</code> themselves. The SDK shares the host <code>Ros</code> object, not Robo-Boy's dependency graph.</p>
+        <p>Panel API v2 brokers ROS as JSON operations. Panels do not receive ROSLIB, the rosbridge URL, or the complete graph; every request is checked against the manifest permissions.</p>
 
         <div class="recipe-stack">
           <details class="recipe" open>
             <summary><span>ROS</span> Subscribe to a topic</summary>
             <div class="recipe-body">
-              <div class="code-block" data-language="TypeScript"><pre><code>import ROSLIB from 'roslib';
+              <div class="code-block" data-language="TypeScript"><pre><code>import type { RoboBoyRosSubscription } from
+  '@tessel-la/roboboy-panel-sdk';
 
-let topic: ROSLIB.Topic | null = null;
+let subscription: RoboBoyRosSubscription | null = null;
 
 if (context.ros) {
-  topic = new ROSLIB.Topic({
-    ros: context.ros,
-    name: '/battery_state',
-    messageType: 'sensor_msgs/msg/BatteryState',
-    queue_length: 1,
-    throttle_rate: 100,
+  const selected = await context.ros.selectTopic({
+    currentTopic: '/battery_state',
   });
-  topic.subscribe((message) =&gt; {
-    // Normalize the unknown message before rendering it.
+  subscription = await context.ros.subscribe({
+    topic: selected.name,
+    messageType: selected.messageType,
+    queueLength: 1,
+    throttleMs: 100,
+    compression: 'none',
+  }, (message) =&gt; {
     renderBattery(message);
   });
 }
 
-// In unmount():
-topic?.unsubscribe();
-topic = null;</code></pre></div>
-              <p>Declare <code>ros</code>, tolerate <code>context.ros === null</code>, bound high-rate data, and unsubscribe on teardown. The official Time Series panel applies this pattern.</p>
+// In async unmount():
+await subscription?.unsubscribe();
+subscription = null;</code></pre></div>
+              <p>Declare <code>capabilities: ["ros"]</code> and <code>permissions.ros.selectTopic: true</code>. The complete graph stays in trusted Robo-Boy UI; the panel receives and is granted only the selected topic and message type.</p>
             </div>
           </details>
 
           <details class="recipe">
             <summary><span>ROS</span> Publish a message</summary>
             <div class="recipe-body">
-              <div class="code-block" data-language="TypeScript"><pre><code>import ROSLIB from 'roslib';
-
-const command = context.ros
-  ? new ROSLIB.Topic({
-      ros: context.ros,
-      name: '/cmd_vel',
-      messageType: 'geometry_msgs/msg/Twist',
-    })
-  : null;
-
-command?.advertise();
-command?.publish(new ROSLIB.Message({
-  linear: { x: 0.2, y: 0, z: 0 },
-  angular: { x: 0, y: 0, z: 0 },
-}));
-
-// In unmount(): stop motion if appropriate, then release.
-command?.unadvertise();</code></pre></div>
-              <p>Match the robot's exact interface definition. For continuous controls, throttle publishing, cancel pending work, and deliberately publish a safe released/stopped state when the panel owns that responsibility.</p>
+              <div class="code-block" data-language="TypeScript"><pre><code>await context.ros?.publish({
+  topic: '/cmd_vel',
+  messageType: 'geometry_msgs/msg/Twist',
+  message: {
+    linear: { x: 0.2, y: 0, z: 0 },
+    angular: { x: 0, y: 0, z: 0 },
+  },
+});</code></pre></div>
+              <p>Declare the exact publish path in <code>permissions.ros.publish</code> and match the robot's interface definition. For continuous controls, throttle publishing, cancel pending work, and deliberately publish a safe released/stopped state when the panel owns that responsibility.</p>
             </div>
           </details>
 
@@ -860,7 +890,7 @@ function save(next: Settings) {
     context.logger.warn('Unable to persist settings.', error);
   }
 }</code></pre></div>
-              <p>v1 has no host-rendered settings pane. Render controls inside your tile, sanitize loaded data, keep secrets out of storage, and handle quota errors.</p>
+              <p>v2 has no host-rendered settings pane. Render controls inside your tile, sanitize loaded data, keep secrets out of storage, and handle quota errors.</p>
             </div>
           </details>
 
@@ -893,7 +923,7 @@ if (frame !== null) cancelAnimationFrame(frame);</code></pre></div>
           <details class="recipe">
             <summary><span>VIDEO</span> Camera and WebRTC panels</summary>
             <div class="recipe-body">
-              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code>, read <code>context.runtime.endpoints.videoStream</code>, and own its fetch/WebRTC lifecycle. The official WebRTC panel:</p>
+              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code> with <code>permissions.network.hostEndpoints: ["videoStream"]</code>, read <code>context.network?.endpoints.videoStream</code>, use <code>context.network.fetch</code>, and own its WebRTC lifecycle. The official WebRTC panel:</p>
               <ul class="check-list">
                 <li>Discovers ready gateway paths below the restricted <code>/webrtc/_discovery/paths</code> resource.</li>
                 <li>Negotiates WHEP with the browser's native WebRTC API.</li>
@@ -933,22 +963,21 @@ device = null;</code></pre></div>
           <article><span>01</span><h3>Pure logic</h3><p>Unit-test message normalization, field selection, sizing, state migration, and protocol helpers without a browser.</p></article>
           <article><span>02</span><h3>Lifecycle</h3><p>Exercise activation, mount, active-state changes, repeated cleanup, missing services, quota errors, and failures.</p></article>
           <article><span>03</span><h3>Artifact</h3><p>Import <code>dist/index.js</code>; verify its default ID/API, required methods, no unresolved bare imports, and SHA-256.</p></article>
-          <article><span>04</span><h3>Host integration</h3><p>Stage through the inventory and test add, reload, reconnect, hide/show, resize, remove, and retry inside Robo-Boy.</p></article>
+          <article><span>04</span><h3>Host integration</h3><p>Stage through schema-v2 desired state and test add, sandbox startup, permission denials, trusted topic selection, reload, reconnect, hide/show, resize, remove, and retry.</p></article>
         </div>
 
         <h3 class="subhead">Local repository layout</h3>
         <div class="code-block" data-language="text"><pre><code>workspace/
   robo-boy/                 # host application
-  my-roboboy-panel/        # independent source + dist + manifest
-  my-panel-inventory/      # catalog metadata only</code></pre></div>
-        <p>The local stager scans immediate children below <code>--source-root</code> and matches repositories by manifest ID, not directory name. It verifies bundle, manifest, and inventory metadata before generating an ignored <code>.panel-stage/public/</code> tree.</p>
+  my-roboboy-panel/        # independent source + dist + manifest</code></pre></div>
+        <p>The local source lists repository directories explicitly, then verifies bundle, manifest, permissions, compatibility, and integrity before generating an ignored <code>.panel-stage/public/</code> tree. A separate inventory entry is needed only when publishing.</p>
 
         <h3 class="subhead">Robo-Boy project checks</h3>
         <div class="code-block" data-language="bash"><pre><code>npm run lint
 npm run test:run
 npm run build
 npm run e2e</code></pre></div>
-        <p>For Docker development with the known examples, add <code>infra/compose/panels.yml</code>. For a private sibling panel, mount its repository and inventory through an uncommitted deployment-local Compose override.</p>
+        <p>For Docker development with the known examples, add <code>infra/compose/panels.yml</code>. For a private sibling panel, mount its repository through an uncommitted deployment-local Compose override and select it in the schema-v2 source configuration.</p>
       </section>
 
       <section id="distribution" class="doc-section">
@@ -965,24 +994,26 @@ npm run e2e</code></pre></div>
         </div>
 
         <ol class="plain-steps">
-          <li><strong>Bundle every runtime dependency.</strong> The release entry must be browser ESM with no unresolved bare imports. Frameworks such as React, Vue, Three.js, and ROSLIB belong to the panel bundle.</li>
+          <li><strong>Bundle every runtime dependency.</strong> The release entry must be self-contained browser ESM with no unresolved bare imports or relative dynamic chunks. Frameworks such as React, Vue, and Three.js belong to the panel bundle; ROS access comes from the v2 broker.</li>
           <li><strong>Generate and record SHA-256 SRI.</strong> The exact value must agree across bundle, panel manifest, and inventory.</li>
           <li><strong>Publish a versioned release.</strong> Include the manifest and bundle. Treat assets as append-only.</li>
           <li><strong>Register metadata separately.</strong> An inventory points at immutable release artifacts; it is not installed state and does not host source.</li>
-          <li><strong>Install for a deployment.</strong> The remote installer downloads selected releases, verifies identity and hashes, then atomically replaces <code>installed.json</code>. The browser imports only same-origin staged code.</li>
+          <li><strong>Install for a deployment.</strong> The panel manager resolves explicit desired state, downloads selected releases, verifies identity and hashes, then atomically replaces <code>installed.json</code>. The browser transfers verified same-origin bytes into isolated panel sandboxes.</li>
         </ol>
 
-        <div class="code-block" data-language="bash"><pre><code># Official remote inventory overlay
+        <div class="code-block" data-language="bash"><pre><code># Official remote source overlay
+export ROBOBOY_PANEL_MANAGER_TOKEN='use-a-long-random-deployment-secret'
+
 docker compose \
   -f docker-compose.yml \
   -f infra/compose/panels.remote.yml \
-  build app panel-installer
+  build app panel-manager
 
 docker compose \
   -f docker-compose.yml \
   -f infra/compose/panels.remote.yml \
   up -d</code></pre></div>
-        <p>Private inventories can use HTTPS release storage and an authorization value supplied through a named environment variable. Credentials stay on the installer side and are never sent to the browser. Duplicate IDs across configured inventories are rejected.</p>
+        <p>The Compose manager exposes authenticated preview/apply installation controls through <b>Manage installations…</b>. Private sources can use HTTPS release storage and authorization supplied through an approved named environment variable. Credentials stay on the manager side, redirects are revalidated, and duplicate IDs across configured sources are rejected.</p>
       </section>
 
       <section id="practices" class="doc-section">
@@ -994,10 +1025,10 @@ docker compose \
             <span class="status-label status-label--stable">Public / versioned</span>
             <h3>Safe dependencies</h3>
             <ul class="check-list">
-              <li><code>panel-sdk/index.d.ts</code> and API version <code>1.0.0</code>.</li>
-              <li>The definition, context, lifecycle, runtime, storage, connection, viewport, and logger interfaces.</li>
-              <li>The manifest fields and installed-registry contract documented for v1.</li>
-              <li>CSS custom properties as optional theme hints with your own fallbacks.</li>
+              <li><code>panel-sdk/index.d.ts</code> and API version <code>2.0.0</code>.</li>
+              <li>The definition, lifecycle, brokered ROS/network, storage, runtime, connection, viewport, theme, and logger interfaces.</li>
+              <li>The manifest capabilities, permission blocks, and installed-registry contract documented for v2.</li>
+              <li>The reviewed CSS custom properties, used with your own fallbacks.</li>
             </ul>
           </div>
           <div class="internal-card">
@@ -1007,7 +1038,7 @@ docker compose \
               <li>React components, hooks, application stores, and feature-module files.</li>
               <li><code>MainControlView</code>, <code>ExternalPanelHost</code>, loader/registry internals, or localStorage keys.</li>
               <li>Built-in panel adapters and custom-gamepad implementation details.</li>
-              <li>Robo-Boy's bundled copy of ROSLIB, Three.js, or any other dependency.</li>
+              <li>Robo-Boy's bundled copy of ROSLIB, Three.js, or any other dependency, and its private endpoint map.</li>
             </ul>
           </div>
         </div>
@@ -1016,8 +1047,8 @@ docker compose \
           <article><h3>Own resources</h3><p>Create clients inside the instance that cleans them up. Make <code>unmount</code> safe to call after partial startup and more than once.</p></article>
           <article><h3>Defend state</h3><p>Version and sanitize your settings. Store only plain JSON. Keep live objects, handles, credentials, and large sample buffers in memory.</p></article>
           <article><h3>Respect activity</h3><p>Stop decoding, polling, plotting, and device traffic while inactive. Design from a small tile upward using viewport snapshots.</p></article>
-          <article><h3>Handle reconnects</h3><p>Watch connection generation. Discard events from stale clients and rebuild clients when the shared ROS instance changes.</p></article>
-          <article><h3>Keep releases lean</h3><p>Bundle only what the panel needs and lazy-load optional heavy features. Shared host dependencies are deliberately not part of v1.</p></article>
+          <article><h3>Handle reconnects</h3><p>Watch connection generation. Discard stale async results and re-establish brokered subscriptions after reconnects.</p></article>
+          <article><h3>Keep releases lean</h3><p>Bundle only what the panel needs. Shared host dependencies are deliberately not part of v2, and relative dynamic chunks are not supported.</p></article>
           <article><h3>Fail locally</h3><p>Use the supplied logger, provide meaningful empty/error states, and allow exceptions to remain attributable to your versioned bundle.</p></article>
         </div>
       </section>
@@ -1044,11 +1075,11 @@ docker compose \
           </details>
           <details>
             <summary>Local panel staging fails</summary>
-            <div><p>Confirm the panel and inventory are immediate siblings below <code>--source-root</code>. The manifest ID, version, compatibility, capabilities, and integrity must match the inventory. Rebuild, regenerate the digest, and update both records.</p></div>
+            <div><p>Confirm the schema-v2 configuration names the local repository explicitly and its root resolves correctly on the host or through the approved root environment variable. Rebuild, regenerate the digest, and verify the manifest ID, API compatibility, capabilities, permissions, and integrity.</p></div>
           </details>
           <details>
             <summary>The tile says the panel could not start</summary>
-            <div><p>Inspect the panel-prefixed console error. Common causes are an invalid default export, mismatched ID/API version, rejected integrity, unresolved runtime imports, failure in <code>activate</code>/<code>mount</code>, or a missing capability/service. Fix the artifact and publish/stage a new immutable version.</p></div>
+            <div><p>Inspect the panel-prefixed console error. Common causes are an invalid default export, mismatched ID/API version, rejected integrity, unresolved runtime imports, sandbox startup failure, failure in <code>activate</code>/<code>mount</code>, or a denied capability/permission. Fix the artifact and publish/stage a new immutable version.</p></div>
           </details>
           <details>
             <summary>State fails to save</summary>
@@ -1063,17 +1094,17 @@ docker compose \
 
       <section id="gaps" class="doc-section doc-section--last">
         <div class="section-kicker">15 / Known gaps</div>
-        <h2>What the v1 SDK deliberately does not promise yet.</h2>
+        <h2>What the v2 SDK deliberately does not promise yet.</h2>
         <p>These are current platform boundaries found in the SDK, host loader, and project documentation—not hidden APIs to work around.</p>
         <div class="gap-list">
-          <article><span>01</span><div><h3>No installation UI</h3><p>Install, update, removal, and panel selection are deployment-managed. There is no rollback UI, scheduled update policy, revocation service, or garbage collector.</p></div></article>
-          <article><span>02</span><div><h3>No untrusted sandbox</h3><p>Same-realm code can access browser globals. Capabilities are declarations, not enforcement. An iframe/worker protocol with brokered APIs would be required for untrusted panels.</p></div></article>
+          <article><span>01</span><div><h3>No automatic update or rollback</h3><p>Compose provides authenticated preview/apply installation management, but there is no rollback UI, scheduled update policy, publisher revocation service, or garbage collector. CLI staging remains available for builds and Tauri.</p></div></article>
+          <article><span>02</span><div><h3>Not a hostile-code boundary</h3><p>The opaque-origin iframe prevents parent-page access and brokers host services, but a panel can still consume main-thread resources or misuse data explicitly granted to it. Install only reviewed artifacts.</p></div></article>
           <article><span>03</span><div><h3>No host settings surface</h3><p>Panels render their own settings inside the tile. There is no standardized settings schema, secret store, notifications API, or application-level command surface.</p></div></article>
-          <article><span>04</span><div><h3>Single-bundle remote installer</h3><p>The remote installer rejects extra manifest assets until inventory metadata defines immutable URLs for every asset.</p></div></article>
-          <article><span>05</span><div><h3>No shared runtime dependencies</h3><p>Panel authors bundle ROSLIB and any framework themselves. This preserves independence but can duplicate code across panels.</p></div></article>
+          <article><span>04</span><div><h3>Single-bundle releases</h3><p>The installer rejects extra manifest assets until inventory metadata defines immutable URLs for every asset.</p></div></article>
+          <article><span>05</span><div><h3>No shared runtime dependencies</h3><p>Panel authors bundle any framework and runtime libraries themselves. This preserves independence but can duplicate code across panel sandboxes.</p></div></article>
           <article><span>06</span><div><h3>Integrity is not identity</h3><p>SHA-256 detects drift but does not authenticate a publisher. Signing, inventory review policy, transactional rollback metadata, and revocation remain future hardening work.</p></div></article>
-          <article><span>07</span><div><h3>Best-effort runtime isolation</h3><p>Lifecycle failures are tile-local and attributable bundle errors are caught, but arbitrary synchronous panel code can still block the main thread or mutate global state.</p></div></article>
-          <article><span>08</span><div><h3>Raw ROS, few convenience APIs</h3><p>The shared ROS object supports robot-specific use cases, but the SDK currently offers no narrower topic/service/action helpers or host-owned schema discovery service.</p></div></article>
+          <article><span>07</span><div><h3>No per-panel resource accounting</h3><p>Lifecycle failures are tile-local and removing the iframe terminates its realm, but CPU-heavy synchronous code can still affect the main thread. Per-panel CPU and bandwidth limits remain future work.</p></div></article>
+          <article><span>08</span><div><h3>ROS is a JSON broker</h3><p>API v2 supports discovery, trusted topic selection, subscriptions, publishing, and service calls. Binary payloads, actions, and streaming service responses are not part of the contract.</p></div></article>
         </div>
 
         <div class="next-card">
