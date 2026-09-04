@@ -552,22 +552,15 @@ Object.assign(window, { useTweaks, TweaksPanel, TweakSection, TweakRadio });
 const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/{ "theme": "light" }/*EDITMODE-END*/;
 const { useState, useEffect, useRef, useCallback } = React;
 
-// The installers carry their version in the file name, so a direct link cannot be written
-// down ahead of time. The release page below always resolves to the newest release, and the
-// per-platform links are read from that release at load time so they never go stale.
-const ROBOBOY_RELEASE_PAGE = "https://github.com/tessel-la/robo-boy/releases/latest";
-const ROBOBOY_RELEASE_API = "https://api.github.com/repos/tessel-la/robo-boy/releases/latest";
+// Robo-Boy publishes every installer under a name that does not change, and this path always
+// resolves to the newest release, so these links keep working after each one without the page
+// having to ask which release is current.
+const ROBOBOY_DOWNLOAD = "https://github.com/tessel-la/robo-boy/releases/latest/download/";
 const ROBOBOY_PLATFORMS = [
-  { label: "Linux", suffix: ".deb", icon: "linux" },
-  { label: "macOS", suffix: ".dmg", icon: "apple" },
-  { label: "Windows", suffix: ".exe", icon: "windows" },
+  { label: "Linux", file: "Robo-Boy-linux-amd64.deb", icon: "linux" },
+  { label: "macOS", file: "Robo-Boy-macos-universal.dmg", icon: "apple" },
+  { label: "Windows", file: "Robo-Boy-windows-x64-setup.exe", icon: "windows" },
 ];
-
-// Falls back to the release page, so a button still takes the visitor somewhere useful when
-// the release cannot be read.
-const installerHref = (assets, suffix) =>
-  (assets.find((asset) => asset.name.endsWith(suffix)) || {}).browser_download_url
-  || ROBOBOY_RELEASE_PAGE;
 
 const Icon = {
   github: (p) => (
@@ -825,17 +818,7 @@ function Constellation() {
 
 function Projects() {
   const [playing, setPlaying] = useState(false);
-  const [installers, setInstallers] = useState([]);
   const videoRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(ROBOBOY_RELEASE_API)
-      .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
-      .then((release) => { if (!cancelled) setInstallers(release.assets || []); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
 
   const play = () => {
     setPlaying(true);
@@ -875,10 +858,10 @@ function Projects() {
                 Watch teaser <Icon.arrow/>
               </button>
               <div className="project-downloads">
-                {ROBOBOY_PLATFORMS.map(({ label, suffix, icon }) => {
+                {ROBOBOY_PLATFORMS.map(({ label, file, icon }) => {
                   const Glyph = Icon[icon];
                   return (
-                    <a key={label} className="btn btn--ghost" href={installerHref(installers, suffix)} target="_blank" rel="noopener">
+                    <a key={label} className="btn btn--ghost" href={ROBOBOY_DOWNLOAD + file} target="_blank" rel="noopener">
                       <Glyph/> {label}
                     </a>
                   );
