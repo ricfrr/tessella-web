@@ -198,6 +198,7 @@ cd robo-boy
 docker compose up -d --build ros-stack</code></pre>
               </div>
               <p>This one service supplies <code>rosbridge</code>, <code>rosapi</code>, and <code>web_video_server</code>. The web frontend, the proxy, and the certificate it would need are not started, because the desktop app talks to these ports directly.</p>
+              <p class="fine-print">If the robot publishes message, service, or action types of its own, mount that workspace as well, or those topics arrive without a definition to read them with. See <a href="#connect">robot-specific interfaces</a>.</p>
             </div>
           </li>
           <li>
@@ -313,7 +314,14 @@ npm run desktop:dev</code></pre></div>
         <p class="fine-print">On the web, Quick Connect normally resolves these through same-origin <code>/websocket</code>, <code>/video_stream</code>, <code>/mesh_resources</code>, and <code>/ollama</code> routes. Advanced Ports override the first three service ports. Tauri connects directly.</p>
 
         <h3 class="subhead">DDS and robot-specific interfaces</h3>
-        <p>The <code>ros-stack</code> service uses host networking for DDS discovery. Every container that must discover the same graph needs compatible <code>ROS_DOMAIN_ID</code>, <code>ROS_LOCALHOST_ONLY</code>, and <code>RMW_IMPLEMENTATION</code> settings. Custom messages, services, and actions must be available through a mounted, built overlay workspace.</p>
+        <p>The <code>ros-stack</code> service uses host networking for DDS discovery. Every container that must discover the same graph needs compatible <code>ROS_DOMAIN_ID</code>, <code>ROS_LOCALHOST_ONLY</code>, and <code>RMW_IMPLEMENTATION</code> settings.</p>
+        <p>Robo-Boy reads a topic through the interface definition that describes it, and it only has the definitions present inside <code>ros-stack</code>. A robot with message, service, or action types of its own therefore needs its built workspace mounted there, or those topics appear in the graph and cannot be decoded. Mount the workspace's <code>install</code> directory under a unique path in a Compose override:</p>
+        <div class="code-block" data-language="yaml"><pre><code>services:
+  ros-stack:
+    volumes:
+      - /path/to/robot_ws/install:/overlay_ws/robot:ro</code></pre></div>
+        <div class="code-block code-block--compact" data-language="bash"><pre><code>COMPOSE_FILE=docker-compose.yml:infra/compose/robot.yml docker compose up -d --build</code></pre></div>
+        <p class="fine-print">Overrides for the bundled Aerostack and manipulator workspaces already exist under <code>infra/compose/</code>. A workspace built with <code>colcon --symlink-install</code> also needs its build and source directories mounted, since its installed files point back at them.</p>
         <div class="code-block" data-language="dotenv"><pre><code>ROS_DOMAIN_ID=0
 ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 ROS_STATIC_PEERS=
