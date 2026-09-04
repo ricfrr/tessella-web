@@ -21,7 +21,7 @@
         <span>tessel·la</span>
       </a>
       <div class="docs-nav__meta">
-        <span class="version-pill">Robo·Boy 0.3.1-alpha</span>
+        <a class="version-pill" href="https://github.com/tessel-la/robo-boy/releases/latest" target="_blank" rel="noopener">Robo·Boy releases</a>
         <a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">GitHub</a>
         <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
           <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
@@ -170,8 +170,50 @@
 
       <section id="quickstart" class="doc-section">
         <div class="section-kicker">02 / Install &amp; run</div>
-        <h2>The shortest route is the complete Docker stack.</h2>
-        <p>Use Docker when you need the frontend, ROS bridge, video server, and same-origin proxy together. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
+        <h2>Two routes: the desktop app, or the browser stack.</h2>
+        <p>The desktop app is the shorter one. It needs only the ROS services, so there is no certificate to create and no proxy to run. Choose the browser stack when Robo-Boy has to be opened from a phone, tablet, or another computer.</p>
+
+        <h3 class="subhead">Desktop app and ROS stack</h3>
+        <ol class="steps">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Install the desktop app</h3>
+              <div class="endpoint-grid">
+                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-amd64.deb"><code>.deb</code></a></div>
+                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-x86_64.rpm"><code>.rpm</code></a></div>
+                <div><span>macOS</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-macos-universal.dmg"><code>.dmg</code></a></div>
+                <div><span>Windows</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-windows-x64-setup.exe"><code>.exe</code></a></div>
+              </div>
+              <p class="fine-print">Each link resolves to the newest release. The macOS image is universal; the Linux packages are x86-64.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Start the ROS services only</h3>
+              <div class="code-block" data-language="bash">
+                <pre><code>git clone git@github.com:tessel-la/robo-boy.git
+cd robo-boy
+docker compose up -d --build ros-stack</code></pre>
+              </div>
+              <p>This one service supplies <code>rosbridge</code>, <code>rosapi</code>, and <code>web_video_server</code>. The web frontend, the proxy, and the certificate it would need are not started, because the desktop app talks to these ports directly.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Open the app and connect</h3>
+              <p>Use <strong>Quick Connect</strong> when ROS runs on the same computer. When it runs elsewhere, open the advanced options, choose <strong>Host or IP</strong>, and enter that computer's hostname, LAN address, or VPN name.</p>
+              <div class="code-block code-block--compact" data-language="bash"><pre><code>docker compose logs -f ros-stack
+docker compose down</code></pre></div>
+            </div>
+          </li>
+        </ol>
+        <p class="fine-print">Robo-Boy never starts, stops, or bundles ROS. Run the stack on the robot computer instead of locally and only step 2 changes.</p>
+
+        <h3 class="subhead">Browser, with the full Docker stack</h3>
+        <p>Serving Robo-Boy to a browser adds two requirements the desktop app does not have: a browser needs HTTPS before it will grant a page a camera and other secure-context features, and the app and the robot services have to appear under one origin. Caddy supplies both, and a locally trusted certificate is what makes the first one work without warnings. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
 
         <ol class="steps">
           <li>
@@ -194,12 +236,11 @@ mkcert \
           <li>
             <span class="step-number">2</span>
             <div>
-              <h3>Select the base ROS configuration and start</h3>
+              <h3>Start the stack</h3>
               <div class="code-block" data-language="bash">
-                <pre><code>cp config/env/no-overlay.env.example .env
-docker compose up -d --build</code></pre>
+                <pre><code>docker compose up -d --build</code></pre>
               </div>
-              <p>Open <code>https://localhost</code>, or <code>https://YOUR_HOST_IP</code> from a device on the same network.</p>
+              <p>Open <code>https://localhost</code>, or <code>https://YOUR_HOST_IP</code> from a device on the same network. Every ROS and DDS setting has a default, so no environment file is needed for this configuration; add one only to select a robot workspace overlay.</p>
             </div>
           </li>
           <li>
@@ -278,7 +319,9 @@ ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 ROS_STATIC_PEERS=
 RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
-        <p>Use <code>config/env/aerostack.env.example</code> or <code>config/env/manipulator.env.example</code> instead of the no-overlay file for those included integrations. After changing overlays, recreate the service:</p>
+        <p>A robot workspace overlay is selected by pointing Compose at one of the bundled override files, either in <code>.env</code> or on the command line. After changing overlays, recreate the service:</p>
+        <div class="code-block" data-language="dotenv"><pre><code>COMPOSE_FILE=docker-compose.yml:infra/compose/aerostack.yml
+# or infra/compose/manipulator.yml</code></pre></div>
         <div class="code-block" data-language="bash"><pre><code>docker compose up -d --build --force-recreate ros-stack</code></pre></div>
       </section>
 
