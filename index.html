@@ -552,10 +552,10 @@ Object.assign(window, { useTweaks, TweaksPanel, TweakSection, TweakRadio });
 const TWEAKS_DEFAULTS = /*EDITMODE-BEGIN*/{ "theme": "light" }/*EDITMODE-END*/;
 const { useState, useEffect, useRef, useCallback } = React;
 
-// Robo-Boy publishes every installer under a name that does not change, and this path always
-// resolves to the newest release, so these links keep working after each one without the page
-// having to ask which release is current.
-const ROBOBOY_DOWNLOAD = "https://github.com/tessel-la/robo-boy/releases/latest/download/";
+// Robo-Boy also publishes Panel SDK releases in this repository. Pin installers to the application
+// release tag so a newer SDK-only release cannot take over GitHub's repository-wide "latest" URL.
+const ROBOBOY_RELEASE_TAG = "robo-boy-v0.7.0-alpha";
+const ROBOBOY_DOWNLOAD = `https://github.com/tessel-la/robo-boy/releases/download/${ROBOBOY_RELEASE_TAG}/`;
 const ROBOBOY_PLATFORMS = [
   { label: "Linux", file: "Robo-Boy-linux-amd64.deb", icon: "linux" },
   { label: "macOS", file: "Robo-Boy-macos-universal.dmg", icon: "apple" },

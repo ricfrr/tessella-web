@@ -21,7 +21,7 @@
         <span>tessel·la</span>
       </a>
       <div class="docs-nav__meta">
-        <a class="version-pill" href="https://github.com/tessel-la/robo-boy/releases/latest" target="_blank" rel="noopener">Robo·Boy releases</a>
+        <a class="version-pill" href="https://github.com/tessel-la/robo-boy/releases/tag/robo-boy-v0.7.0-alpha" target="_blank" rel="noopener">Robo·Boy 0.7.0-alpha</a>
         <a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">GitHub</a>
         <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
           <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
@@ -180,12 +180,12 @@
             <div>
               <h3>Install the desktop app</h3>
               <div class="endpoint-grid">
-                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-amd64.deb"><code>.deb</code></a></div>
-                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-x86_64.rpm"><code>.rpm</code></a></div>
-                <div><span>macOS</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-macos-universal.dmg"><code>.dmg</code></a></div>
-                <div><span>Windows</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-windows-x64-setup.exe"><code>.exe</code></a></div>
+                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/download/robo-boy-v0.7.0-alpha/Robo-Boy-linux-amd64.deb"><code>.deb</code></a></div>
+                <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/download/robo-boy-v0.7.0-alpha/Robo-Boy-linux-x86_64.rpm"><code>.rpm</code></a></div>
+                <div><span>macOS</span><a href="https://github.com/tessel-la/robo-boy/releases/download/robo-boy-v0.7.0-alpha/Robo-Boy-macos-universal.dmg"><code>.dmg</code></a></div>
+                <div><span>Windows</span><a href="https://github.com/tessel-la/robo-boy/releases/download/robo-boy-v0.7.0-alpha/Robo-Boy-windows-x64-setup.exe"><code>.exe</code></a></div>
               </div>
-              <p class="fine-print">Each link resolves to the newest release. The macOS image is universal; the Linux packages are x86-64.</p>
+              <p class="fine-print">These links are pinned to the Robo-Boy 0.7.0-alpha application release, not the repository's newest release—which may be an SDK-only artifact. The macOS image is universal; the Linux packages are x86-64.</p>
             </div>
           </li>
           <li>
@@ -211,7 +211,14 @@ docker compose down</code></pre></div>
             </div>
           </li>
         </ol>
-        <p class="fine-print">Robo-Boy never starts, stops, or bundles ROS. Run the stack on the robot computer instead of locally and only step 2 changes.</p>
+        <div class="callout callout--important">
+          <div class="callout-icon">CAM</div>
+          <div>
+            <strong>WebRTC panel 3.0.0 is installed from the official catalog.</strong>
+            <p>Open <b>Manage installations…</b> to install <b>WebRTC / RTSP Camera</b>. Robo-Boy 0.7.0-alpha supplies dedicated WHEP, discovery, and HLS gateway endpoints. Browsers negotiate WHEP; a Linux desktop webview without <code>RTCPeerConnection</code> automatically uses the gateway's low-latency HLS stream and reports <code>Live · HLS</code>. The robot or simulator deployment must run MediaMTX with WHEP on <code>:8889</code>, discovery on <code>:9997</code>, and HLS on <code>:8888</code>.</p>
+          </div>
+        </div>
+        <p class="fine-print">Robo-Boy never starts, stops, or bundles ROS or the media gateway. Run those services on the robot or simulator computer instead of locally and only step 2 changes.</p>
 
         <h3 class="subhead">Browser, with the full Docker stack</h3>
         <p>Serving Robo-Boy to a browser adds two requirements the desktop app does not have: a browser needs HTTPS before it will grant a page a camera and other secure-context features, and the app and the robot services have to appear under one origin. Caddy supplies both, and a locally trusted certificate is what makes the first one work without warnings. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
@@ -400,7 +407,7 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
       <section id="sdk" class="doc-section">
         <div class="section-kicker">06 / Panel SDK</div>
         <h2>Independent code. Small contract. Trusted boundary.</h2>
-        <p class="lead">The Panel SDK is a type-only package. A panel exports one framework-neutral definition, runs in its own opaque-origin iframe, owns everything below the supplied DOM element, and receives only declared host services over a private channel. Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
+        <p class="lead">Panel SDK 2.1.0 is a type-only, additive update to the Panel API 2.0 contract. A panel exports one framework-neutral definition, runs in its own opaque-origin iframe, owns everything below the supplied DOM element, and receives only declared host services over a private channel. The release adds dedicated WHEP, discovery, and HLS host endpoints plus binary <code>arrayBuffer()</code> responses; Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
 
         <div class="boundary-map">
           <div>
@@ -418,7 +425,7 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
           <div>
             <span class="mini-label">Installed deployment</span>
             <strong>Same-origin versioned assets</strong>
-            <p><code>panels/installed.json</code> lists only the releases packaged into that Robo-Boy deployment.</p>
+            <p><code>panels/installed.json</code> lists the verified releases installed into that Robo-Boy deployment from its configured catalogs.</p>
           </div>
         </div>
 
@@ -452,11 +459,11 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
     },
     "network": {
       "origins": ["https://telemetry.example.com"],
-      "hostEndpoints": ["videoStream"]
+      "hostEndpoints": ["webrtcWhep", "webrtcDiscovery", "webrtcHls"]
     }
   }
 }</code></pre></div>
-        <p>ROS and network capabilities require matching permission blocks. Static topic/service patterns are checked for every operation. <code>selectTopic</code> opens a trusted Robo-Boy picker and grants only the chosen topic to that tile; panels never receive the unfiltered graph. Brokered network requests omit ambient browser credentials and revalidate redirects.</p>
+        <p>ROS and network capabilities require matching permission blocks. Static topic/service patterns are checked for every operation. <code>selectTopic</code> opens a trusted Robo-Boy picker and grants only the chosen topic to that tile; panels never receive the unfiltered graph. Brokered network requests omit ambient browser credentials, revalidate redirects, and can return text, JSON, or binary bytes. <code>videoStream</code> remains available for older panels; new stream panels should request the dedicated gateway endpoints.</p>
       </section>
 
       <section id="lifecycle" class="doc-section">
@@ -600,14 +607,30 @@ interface RoboBoyPanelLogger {
   callService(options: RoboBoyRosServiceOptions): Promise&lt;RoboBoyJsonObject&gt;;
 }
 
+type RoboBoyHostEndpoint =
+  | 'videoStream'
+  | 'webrtcWhep'
+  | 'webrtcDiscovery'
+  | 'webrtcHls';
+
+interface RoboBoyPanelNetworkResponse {
+  readonly ok: boolean;
+  readonly status: number;
+  readonly statusText: string;
+  readonly headers: { get(name: string): string | null };
+  text(): Promise&lt;string&gt;;
+  json&lt;T extends RoboBoyJsonValue = RoboBoyJsonValue&gt;(): Promise&lt;T&gt;;
+  arrayBuffer(): Promise&lt;ArrayBuffer&gt;;
+}
+
 interface RoboBoyPanelNetwork {
-  readonly endpoints: Partial&lt;Record&lt;'videoStream', string&gt;&gt;;
+  readonly endpoints: Partial&lt;Record&lt;RoboBoyHostEndpoint, string&gt;&gt;;
   fetch(
     url: string,
     request?: RoboBoyPanelNetworkRequest
   ): Promise&lt;RoboBoyPanelNetworkResponse&gt;;
 }</code></pre></div>
-          <p>ROS permissions can allow filtered discovery, a trusted host topic picker, subscription patterns, publish patterns, and services. Network permissions allow exact HTTPS origins, <code>self</code>, <code>https:</code>, or named host endpoints. The broker rechecks every operation and redirect.</p>
+          <p>ROS permissions can allow filtered discovery, a trusted host topic picker, subscription patterns, publish patterns, and services. Network permissions allow exact HTTPS origins, <code>self</code>, <code>https:</code>, or named host endpoints. The broker rechecks every operation and redirect; <code>arrayBuffer()</code> carries media segments and other non-text responses without bypassing the panel sandbox.</p>
         </details>
 
         <details class="api-detail">
@@ -673,7 +696,7 @@ mkdir -p src scripts</code></pre></div>
     "integrity": "node scripts/print-integrity.mjs"
   },
   "devDependencies": {
-    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v2.0.0/tessel-la-roboboy-panel-sdk-2.0.0.tgz",
+    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v2.1.0/tessel-la-roboboy-panel-sdk-2.1.0.tgz",
     "typescript": "^5.2.2"
   }
 }</code></pre></div>
@@ -974,14 +997,15 @@ if (frame !== null) cancelAnimationFrame(frame);</code></pre></div>
           <details class="recipe">
             <summary><span>VIDEO</span> Camera and WebRTC panels</summary>
             <div class="recipe-body">
-              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code> with <code>permissions.network.hostEndpoints: ["videoStream"]</code>, read <code>context.network?.endpoints.videoStream</code>, use <code>context.network.fetch</code>, and own its WebRTC lifecycle. The official WebRTC panel:</p>
+              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code> with <code>permissions.network.hostEndpoints: ["webrtcWhep", "webrtcDiscovery", "webrtcHls"]</code>, use the matching <code>context.network?.endpoints</code>, and own its media lifecycle. The official WebRTC panel 3.0.0:</p>
               <ul class="check-list">
                 <li>Discovers ready gateway paths below the restricted <code>/webrtc/_discovery/paths</code> resource.</li>
                 <li>Negotiates WHEP with the browser's native WebRTC API.</li>
+                <li>Falls back to brokered low-latency HLS only when the desktop webview has no <code>RTCPeerConnection</code>; binary segments are read with <code>arrayBuffer()</code>.</li>
                 <li>Stops statistics timers, aborts discovery, closes the remote WHEP session, and clears media on deactivate/unmount.</li>
                 <li>Keeps bearer credentials in memory; it never writes them to panel storage.</li>
               </ul>
-              <a class="text-link" href="https://github.com/tessel-la/roboboy-webrtc-panel" target="_blank" rel="noopener">Study the complete WebRTC panel ↗</a>
+              <a class="text-link" href="https://github.com/tessel-la/roboboy-webrtc-panel/releases/tag/v3.0.0" target="_blank" rel="noopener">Study the WebRTC panel 3.0.0 release ↗</a>
             </div>
           </details>
 
@@ -1076,7 +1100,7 @@ docker compose \
             <span class="status-label status-label--stable">Public / versioned</span>
             <h3>Safe dependencies</h3>
             <ul class="check-list">
-              <li><code>panel-sdk/index.d.ts</code> and API version <code>2.0.0</code>.</li>
+              <li>Panel SDK <code>2.1.0</code>'s <code>panel-sdk/index.d.ts</code> and API version <code>2.0.0</code>.</li>
               <li>The definition, lifecycle, brokered ROS/network, storage, runtime, connection, viewport, theme, and logger interfaces.</li>
               <li>The manifest capabilities, permission blocks, and installed-registry contract documented for v2.</li>
               <li>The reviewed CSS custom properties, used with your own fallbacks.</li>
