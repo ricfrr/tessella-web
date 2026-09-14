@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>tessel·la</title>
-<meta name="description" content="tessel·la, Building joyful robot experiences." />
+<meta name="description" content="tessel·la. Open-source robotics tools, built as an independent project." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -12,7 +12,7 @@
 
 <style>
 /* ==========================================================
-   tessel·la v2 — minimal, type-led, one accent
+   tessel·la v2: minimal, type-led, one accent
    ========================================================== */
 :root {
   --sol-base03:  #002b36;
@@ -167,7 +167,7 @@ p  { margin: 0; color: var(--ink-soft); }
   display: inline-flex; align-items: center; white-space: nowrap;
 }
 
-/* dot — flat, bold, unmissable */
+/* dot: flat, bold, unmissable */
 .dot-stage {
   position: relative; display: inline-block;
   width: 0.18em; height: 0.9em;
@@ -559,6 +559,8 @@ const ROBOBOY_PLATFORMS = [
   { label: "Linux", file: "Robo-Boy-linux-amd64.deb", icon: "linux" },
   { label: "macOS", file: "Robo-Boy-macos-universal.dmg", icon: "apple" },
   { label: "Windows", file: "Robo-Boy-windows-x64-setup.exe", icon: "windows" },
+  { label: "Android", file: "Robo-Boy-android.apk", icon: "android" },
+  { label: "iOS (unsigned)", file: "Robo-Boy-iphone-unsigned.ipa", icon: "apple" },
 ];
 
 const Icon = {
@@ -585,6 +587,12 @@ const Icon = {
   windows: (p) => (
     <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" {...p}>
       <path d="M0,0H11.377V11.372H0ZM12.623,0H24V11.372H12.623ZM0,12.623H11.377V24H0Zm12.623,0H24V24H12.623"/>
+    </svg>
+  ),
+  android: (p) => (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <path d="M7.2 9.2a4.8 4.8 0 0 1 9.6 0M8.4 7 7.1 4.9M15.6 7l1.3-2.1M6.5 10h11v7.5h-11zM4.8 10.8v5M19.2 10.8v5M8.8 17.5v2.2M15.2 17.5v2.2"/>
+      <path d="M9.3 9.2h.01M14.7 9.2h.01" strokeWidth="2.4"/>
     </svg>
   ),
   sun: (p) => (
@@ -637,11 +645,11 @@ function Hero() {
           <span style={{ display:"inline-block" }}>l</span>a
         </h1>
         <p className="hero-sub">
-          We build open, friendly tools for the people who actually work with robots.
+          An independent project for open, friendly tools that make robots easier to work with.
         </p>
         <div className="hero-meta">
-          <span><i className="led"/> shipping</span>
-          <span>est. 2024</span>
+          <span><i className="led"/> independent project</span>
+          <span>since 2024</span>
           <span>open source</span>
         </div>
       </div>
@@ -650,7 +658,7 @@ function Hero() {
   );
 }
 
-/* Constellation — thread + viewport-pinned traveling dot.
+/* Constellation: thread + viewport-pinned traveling dot.
    The dot stays at 42% from the top of the viewport at all times,
    while its x follows the thread's horizontal path at that y position. */
 function Constellation() {
@@ -736,7 +744,7 @@ function Constellation() {
       }
       ctx.globalAlpha = 1;
 
-      // Traveling dot — viewport-pinned y, x follows thread
+      // Traveling dot: viewport-pinned y, x follows thread
       if (anchors.length >= 2) {
         // All y positions in viewport space (same coords the bezier is drawn in)
         const avys = anchors.map(a => a.y - sy);
@@ -832,7 +840,7 @@ function Projects() {
             <span className="eyebrow">Projects</span>
             <h2>Open tools for<br/>the robot era.</h2>
           </div>
-          <p className="lede">We make small, useful things. Each one is open source peek inside, fork it, ship it.</p>
+          <p className="lede">Small, useful, open-source tools. Made to be explored, forked, and improved.</p>
         </div>
 
         <article className="project reveal">
@@ -840,8 +848,8 @@ function Projects() {
             <span className="num">01 / Robo·Boy</span>
             <h3>A handheld console<br/>for ROS&nbsp;2 robots.</h3>
             <p>
-              A web app that turns your phone into a retro-handheld controller. Custom gamepads,
-              voice commands, live camera, theme-able visuals works on any browser, on any robot.
+              A web app that turns a phone into a retro-handheld controller. It includes custom gamepads,
+              voice commands, live video, and flexible themes, and connects to ROS&nbsp;2 from the browser.
             </p>
             <div className="project-tags">
               <span>custom gamepads</span><span>live camera</span><span>3D viz</span><span>swappable layouts</span><span>themes</span>
@@ -861,7 +869,7 @@ function Projects() {
                   const Glyph = Icon[icon];
                   return (
                     <a key={label} className="btn btn--ghost" href={ROBOBOY_DOWNLOAD + file} target="_blank" rel="noopener">
-                      <Glyph/> {label}
+                      {Glyph && <Glyph/>} {label}
                     </a>
                   );
                 })}
@@ -889,8 +897,8 @@ function Projects() {
 
 function About() {
   const principles = [
-    { num:"01", title:"Open by default", body:"Every line we ship is on GitHub. Fork it, break it, send it back better." },
-    { num:"02", title:"Small over scalable", body:"We'd rather make one tool that you love than ten that gather dust." },
+    { num:"01", title:"Open by default", body:"The code lives on GitHub. Fork it, break it, send it back better." },
+    { num:"02", title:"Small and focused", body:"One useful, well-made tool beats ten that gather dust." },
     { num:"03", title:"Friendly to humans", body:"Robots are weird. The software you use to talk to them shouldn't be." },
   ];
   return (
@@ -899,12 +907,12 @@ function About() {
         <div className="section-head">
           <div className="titles">
             <span className="eyebrow">About</span>
-            <h2>A small studio<br/>building friendly robots.</h2>
+            <h2>Built on the side.<br/>Made to be useful.</h2>
           </div>
           <p className="lede">
-            <strong style={{ color:"var(--ink)", fontWeight:500 }}>tessel·la</strong> is a robotics studio
-            shipping open tools for students, hobbyists, and the engineers who keep their lab robot in a duffel bag.
-            We like our software like our hardware: <em>simple</em>, <em>nostalgic</em>, and easy to take apart.
+            <strong style={{ color:"var(--ink)", fontWeight:500 }}>tessel·la</strong> is an independent robotics project
+            for students, hobbyists, and engineers. The goal is simple: software that feels
+            friendly, useful, and easy to take apart.
           </p>
         </div>
         <div className="about">
@@ -917,8 +925,8 @@ function About() {
             ))}
           </ol>
           <div>
-            <p>We started tessel·la because we wanted a controller that felt like a toy and worked like a tool something you'd actually pull out of your pocket at the demo, not a dashboard that lives behind a VPN.</p>
-            <p>Robo·Boy is the first thing. There will be more. If any of this resonates, the code is open and the door is open.</p>
+            <p>tessel·la started with a simple idea: a robot controller could feel like a toy and still work like a serious tool. Something worth pulling out at a demo, not another dashboard hidden behind a VPN.</p>
+            <p>Robo·Boy is the first project. The code is open, and feedback is welcome.</p>
             <div className="more">
               <a className="btn btn--ghost" href="https://github.com/tessel-la" target="_blank" rel="noopener">
                 <Icon.github/> tessel-la on GitHub
@@ -954,9 +962,9 @@ function Contact() {
         <div className="contact">
           <div>
             <span className="eyebrow">Contact</span>
-            <h2>Got a robot<br/>you'd like to wire up?</h2>
+            <h2>Building something<br/>with robots?</h2>
             <p style={{ marginTop:16, fontSize:16, maxWidth:"44ch" }}>
-              Tell us about it. We answer every message usually within a day, sometimes from a robot.
+              Ideas, feedback, and interesting use cases are always welcome.
             </p>
           </div>
           <form className="contact-form" onSubmit={onSubmit}>

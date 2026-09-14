@@ -133,8 +133,8 @@
     <main id="content" class="docs-content">
       <section id="overview" class="doc-section">
         <div class="section-kicker">01 / Meet Robo·Boy</div>
-        <h2>A web and desktop interface for controlling and visualizing ROS&nbsp;2 robots.</h2>
-        <p class="lead">Robo-Boy combines camera streaming, configurable control pads, 3D visualization, behavior-tree editing, TF inspection, and custom themes in one touch-friendly workspace. The web and desktop apps share the same React codebase; the Tauri desktop package is a thin shell and does not bundle ROS.</p>
+        <h2>A web and native interface for controlling and visualizing ROS&nbsp;2 robots.</h2>
+        <p class="lead">Robo-Boy combines camera streaming, configurable control pads, 3D visualization, behavior-tree editing, TF inspection, and custom themes in one touch-friendly workspace. The web, desktop, and mobile apps share the same React codebase; the native packages are thin shells and do not bundle ROS.</p>
 
         <div class="use-grid">
           <article>
@@ -170,22 +170,24 @@
 
       <section id="quickstart" class="doc-section">
         <div class="section-kicker">02 / Install &amp; run</div>
-        <h2>Two routes: the desktop app, or the browser stack.</h2>
-        <p>The desktop app is the shorter one. It needs only the ROS services, so there is no certificate to create and no proxy to run. Choose the browser stack when Robo-Boy has to be opened from a phone, tablet, or another computer.</p>
+        <h2>Two routes: a native app, or the browser stack.</h2>
+        <p>The native app is the shorter route. It needs only the ROS services, so there is no certificate to create and no proxy to run. Choose the browser stack when Robo-Boy should open directly from a browser.</p>
 
-        <h3 class="subhead">Desktop app and ROS stack</h3>
+        <h3 class="subhead">Native app and ROS stack</h3>
         <ol class="steps">
           <li>
             <span class="step-number">1</span>
             <div>
-              <h3>Install the desktop app</h3>
+              <h3>Install an app</h3>
               <div class="endpoint-grid">
                 <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-amd64.deb"><code>.deb</code></a></div>
                 <div><span>Linux</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-linux-x86_64.rpm"><code>.rpm</code></a></div>
                 <div><span>macOS</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-macos-universal.dmg"><code>.dmg</code></a></div>
                 <div><span>Windows</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-windows-x64-setup.exe"><code>.exe</code></a></div>
+                <div><span>Android</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-android.apk"><code>.apk</code></a></div>
+                <div><span>iOS</span><a href="https://github.com/tessel-la/robo-boy/releases/latest/download/Robo-Boy-iphone-unsigned.ipa"><code>.ipa</code></a></div>
               </div>
-              <p class="fine-print">These stable links advance with each Robo-Boy application release. The macOS image is universal; the Linux packages are x86-64.</p>
+              <p class="fine-print">These stable links advance with each Robo-Boy application release. The macOS image is universal, the Linux packages are x86-64, and the iOS package is unsigned and must be signed before installation.</p>
             </div>
           </li>
           <li>
@@ -197,7 +199,7 @@
 cd robo-boy
 docker compose up -d --build ros-stack</code></pre>
               </div>
-              <p>This one service supplies <code>rosbridge</code>, <code>rosapi</code>, and <code>web_video_server</code>. The web frontend, the proxy, and the certificate it would need are not started, because the desktop app talks to these ports directly.</p>
+              <p>This one service supplies <code>rosbridge</code>, <code>rosapi</code>, and <code>web_video_server</code>. The web frontend, proxy, and certificate are not started, because the native app talks to these ports directly.</p>
               <p class="fine-print">If the robot publishes message, service, or action types of its own, mount that workspace as well, or those topics arrive without a definition to read them with. See <a href="#connect">robot-specific interfaces</a>.</p>
             </div>
           </li>
@@ -221,7 +223,7 @@ docker compose down</code></pre></div>
         <p class="fine-print">Robo-Boy never starts, stops, or bundles ROS or the media gateway. Run those services on the robot or simulator computer instead of locally and only step 2 changes.</p>
 
         <h3 class="subhead">Browser, with the full Docker stack</h3>
-        <p>Serving Robo-Boy to a browser adds two requirements the desktop app does not have: a browser needs HTTPS before it will grant a page a camera and other secure-context features, and the app and the robot services have to appear under one origin. Caddy supplies both, and a locally trusted certificate is what makes the first one work without warnings. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
+        <p>Serving Robo-Boy to a browser adds two requirements the native apps do not have: a browser needs HTTPS before it will grant a page a camera and other secure-context features, and the app and the robot services have to appear under one origin. Caddy supplies both, and a locally trusted certificate is what makes the first one work without warnings. You need Docker with Compose and <a href="https://github.com/FiloSottile/mkcert#installation" target="_blank" rel="noopener">mkcert</a>.</p>
 
         <ol class="steps">
           <li>
@@ -1170,7 +1172,7 @@ docker compose \
       <section id="gaps" class="doc-section doc-section--last">
         <div class="section-kicker">15 / Known gaps</div>
         <h2>What the v2 SDK deliberately does not promise yet.</h2>
-        <p>These are current platform boundaries found in the SDK, host loader, and project documentation—not hidden APIs to work around.</p>
+        <p>These are current platform boundaries found in the SDK, host loader, and project documentation. They are not hidden APIs to work around.</p>
         <div class="gap-list">
           <article><span>01</span><div><h3>No automatic update or rollback</h3><p>Compose provides authenticated preview/apply installation management, but there is no rollback UI, scheduled update policy, publisher revocation service, or garbage collector. CLI staging remains available for builds and Tauri.</p></div></article>
           <article><span>02</span><div><h3>Not a hostile-code boundary</h3><p>The opaque-origin iframe prevents parent-page access and brokers host services, but a panel can still consume main-thread resources or misuse data explicitly granted to it. Install only reviewed artifacts.</p></div></article>
