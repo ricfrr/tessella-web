@@ -448,6 +448,7 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
           <div><code>web-serial</code><span>Declares Web Serial use.</span></div>
           <div><code>camera</code><span>Declares camera/media capture.</span></div>
           <div><code>microphone</code><span>Declares microphone/media capture.</span></div>
+          <div><code>webxr</code><span>Delegates XR spatial tracking and fullscreen for an immersive WebXR session.</span></div>
         </div>
 
         <h3 class="subhead">Permission declarations</h3>
@@ -698,7 +699,7 @@ mkdir -p src scripts</code></pre></div>
     "integrity": "node scripts/print-integrity.mjs"
   },
   "devDependencies": {
-    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v2.1.0/tessel-la-roboboy-panel-sdk-2.1.0.tgz",
+    "@tessel-la/roboboy-panel-sdk": "https://github.com/tessel-la/robo-boy/releases/download/panel-sdk-v2.2.0/tessel-la-roboboy-panel-sdk-2.2.0.tgz",
     "typescript": "^5.2.2"
   }
 }</code></pre></div>
@@ -1102,7 +1103,7 @@ docker compose \
             <span class="status-label status-label--stable">Public / versioned</span>
             <h3>Safe dependencies</h3>
             <ul class="check-list">
-              <li>Panel SDK <code>2.1.0</code>'s <code>panel-sdk/index.d.ts</code> and API version <code>2.0.0</code>.</li>
+              <li>Panel SDK <code>2.2.0</code>'s <code>panel-sdk/index.d.ts</code> and API version <code>2.0.0</code>.</li>
               <li>The definition, lifecycle, brokered ROS/network, storage, runtime, connection, viewport, theme, and logger interfaces.</li>
               <li>The manifest capabilities, permission blocks, and installed-registry contract documented for v2.</li>
               <li>The reviewed CSS custom properties, used with your own fallbacks.</li>
