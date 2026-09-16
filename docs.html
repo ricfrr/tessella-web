@@ -216,8 +216,8 @@ docker compose down</code></pre></div>
         <div class="callout callout--important">
           <div class="callout-icon">CAM</div>
           <div>
-            <strong>WebRTC panel 3.0.0 is installed from the official catalog.</strong>
-            <p>Open <b>Manage installations…</b> to install <b>WebRTC / RTSP Camera</b>. Robo-Boy 0.7.0-alpha supplies dedicated WHEP, discovery, and HLS gateway endpoints. Browsers negotiate WHEP; a Linux desktop webview without <code>RTCPeerConnection</code> automatically uses the gateway's low-latency HLS stream and reports <code>Live · HLS</code>. The robot or simulator deployment must run MediaMTX with WHEP on <code>:8889</code>, discovery on <code>:9997</code>, and HLS on <code>:8888</code>.</p>
+            <strong>WebRTC panel 3.0.1 is installed from the official catalog.</strong>
+            <p>Open <b>Manage installations…</b> to install <b>WebRTC / RTSP Camera</b>. Robo-Boy 0.7.0-alpha and later supply dedicated WHEP, discovery, and HLS gateway endpoints. Browsers negotiate WHEP; a Linux desktop webview without <code>RTCPeerConnection</code> automatically uses the gateway's low-latency HLS stream and reports <code>Live · HLS</code>. The robot or simulator deployment must run MediaMTX with WHEP on <code>:8889</code>, discovery on <code>:9997</code>, and HLS on <code>:8888</code>.</p>
           </div>
         </div>
         <p class="fine-print">Robo-Boy never starts, stops, or bundles ROS or the media gateway. Run those services on the robot or simulator computer instead of locally and only step 2 changes.</p>
@@ -409,7 +409,7 @@ FASTDDS_BUILTIN_TRANSPORTS=UDPv4</code></pre></div>
       <section id="sdk" class="doc-section">
         <div class="section-kicker">06 / Panel SDK</div>
         <h2>Independent code. Small contract. Trusted boundary.</h2>
-        <p class="lead">Panel SDK 2.1.0 is a type-only, additive update to the Panel API 2.0 contract. A panel exports one framework-neutral definition, runs in its own opaque-origin iframe, owns everything below the supplied DOM element, and receives only declared host services over a private channel. The release adds dedicated WHEP, discovery, and HLS host endpoints plus binary <code>arrayBuffer()</code> responses; Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
+        <p class="lead">Panel SDK 2.2.0 is a type-only, additive update to the Panel API 2.0 contract. A panel exports one framework-neutral definition, runs in its own opaque-origin iframe, owns everything below the supplied DOM element, and receives only declared host services over a private channel. The release adds the <code>webxr</code> capability, which delegates XR spatial tracking and fullscreen for an immersive session, on top of the dedicated WHEP, discovery, and HLS host endpoints and binary <code>arrayBuffer()</code> responses introduced in 2.1.0; Robo-Boy does not scan <code>node_modules</code> or import panel source into its application build.</p>
 
         <div class="boundary-map">
           <div>
@@ -1000,7 +1000,7 @@ if (frame !== null) cancelAnimationFrame(frame);</code></pre></div>
           <details class="recipe">
             <summary><span>VIDEO</span> Camera and WebRTC panels</summary>
             <div class="recipe-body">
-              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code> with <code>permissions.network.hostEndpoints: ["webrtcWhep", "webrtcDiscovery", "webrtcHls"]</code>, use the matching <code>context.network?.endpoints</code>, and own its media lifecycle. The official WebRTC panel 3.0.0:</p>
+              <p>For core ROS image topics, prefer the built-in Camera panel or a custom gamepad camera component. A transport-specific external panel can declare <code>network</code> with <code>permissions.network.hostEndpoints: ["webrtcWhep", "webrtcDiscovery", "webrtcHls"]</code>, use the matching <code>context.network?.endpoints</code>, and own its media lifecycle. The official WebRTC panel 3.0.1:</p>
               <ul class="check-list">
                 <li>Discovers ready gateway paths below the restricted <code>/webrtc/_discovery/paths</code> resource.</li>
                 <li>Negotiates WHEP with the browser's native WebRTC API.</li>
@@ -1008,7 +1008,7 @@ if (frame !== null) cancelAnimationFrame(frame);</code></pre></div>
                 <li>Stops statistics timers, aborts discovery, closes the remote WHEP session, and clears media on deactivate/unmount.</li>
                 <li>Keeps bearer credentials in memory; it never writes them to panel storage.</li>
               </ul>
-              <a class="text-link" href="https://github.com/tessel-la/roboboy-webrtc-panel/releases/tag/v3.0.0" target="_blank" rel="noopener">Study the WebRTC panel 3.0.0 release ↗</a>
+              <a class="text-link" href="https://github.com/tessel-la/roboboy-webrtc-panel/releases/tag/v3.0.1" target="_blank" rel="noopener">Study the WebRTC panel 3.0.1 release ↗</a>
             </div>
           </details>
 
