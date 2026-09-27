@@ -113,7 +113,9 @@
   font: 700 21px/1 var(--mono); letter-spacing: -.02em;
 }
 .brand svg { width: 28px; height: 28px; flex: none; }
-.brand .mid { color: var(--tangerine); }
+/* Courier's middle dot has a full-width cell; pull the l's in so the dot sits between their stems,
+   .18em from each (the stems end .36em into the l's cell, the dot's ink starts .22em into its own). */
+.brand .mid { margin: 0 -.25em 0 -.26em; color: var(--tangerine); }
 
 .theme-toggle {
   width: 40px; height: 40px; padding: 0;

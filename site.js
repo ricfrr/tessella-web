@@ -49,17 +49,143 @@
     kinetic.forEach((el) => io.observe(el));
   }
 
-  /* ---------- Hook: the terminals implode exactly into the wordmark's dot ---------- */
-  const terms = document.querySelector(".terms");
-  const dot = document.querySelector(".wm-dot");
-  const aimTerms = () => {
-    if (!terms || !dot) return;
-    const box = terms.getBoundingClientRect(), d = dot.getBoundingClientRect();
-    terms.style.setProperty("--dx", `${d.left + d.width / 2 - (box.left + box.width / 2)}px`);
-    terms.style.setProperty("--dy", `${d.top + d.height / 2 - (box.top + box.height * 0.46)}px`);
-  };
-  aimTerms();
-  document.fonts?.ready.then(aimTerms);
+  /* ---------- The dot sets off: it leaves the wordmark on scroll and rides a dotted thread ----------
+     The thread runs from the wordmark's dot through every scene to the logo's dot in the footer. The
+     travelling dot stays pinned near 42% of the viewport and follows the thread's x at that height,
+     easing off the wordmark at the top and landing in the logo at the bottom. */
+  const seat = document.querySelector(".wm-dot");
+  if (seat && !reduceMotion) {
+    const canvas = document.createElement("canvas");
+    const traveler = document.createElement("i");
+    canvas.className = "thread";
+    traveler.className = "traveler";
+    canvas.setAttribute("aria-hidden", "true");
+    traveler.setAttribute("aria-hidden", "true");
+    document.body.append(canvas, traveler);
+    const ctx = canvas.getContext("2d");
+    const tangerine = getComputedStyle(root).getPropertyValue("--tangerine").trim() || "#FF8722";
+    const TRAVEL_R = 8, REVEAL_AT = 1700, REVEAL_MS = 1100;
+    const t0 = performance.now();
+    const clamp01 = (v) => Math.min(1, Math.max(0, v));
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    let anchors = [], homeR = TRAVEL_R, landR = TRAVEL_R, queued = 0, revealed = false;
+
+    // Anchors in document coordinates: the wordmark's dot, one per scene alternating sides, the footer logo's dot.
+    const layout = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      canvas.style.width = `${innerWidth}px`;
+      canvas.style.height = `${innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const s = seat.getBoundingClientRect();
+      homeR = s.width / 2;
+      anchors = [{ x: s.left + s.width / 2, y: s.top + s.height * 0.57 + scrollY }];
+      const cx = innerWidth / 2, sway = Math.min(innerWidth * 0.3, 420);
+      [["#robo-boy", 0.9], ["#about", -0.8], ["#contact", 0.7]].forEach(([sel, k]) => {
+        const r = document.querySelector(sel)?.getBoundingClientRect();
+        if (r) anchors.push({ x: cx + k * sway, y: r.top + scrollY + r.height / 2 });
+      });
+      // The logo mark's dot sits at (16, 17.7) of its 32-unit square, radius 3.9.
+      const mark = document.querySelector(".site-footer .brand svg")?.getBoundingClientRect();
+      if (mark) {
+        landR = (3.9 / 32) * mark.width;
+        anchors.push({ x: mark.left + mark.width * 0.5, y: mark.top + mark.height * (17.7 / 32) + scrollY });
+      }
+      schedule();
+    };
+
+    // x of the thread at viewport height y: invert the segment's cubic y(t) by bisection, then evaluate x(t).
+    const threadX = (ys, y) => {
+      if (y <= ys[0]) return anchors[0].x;
+      for (let i = 0; i < ys.length - 1; i++) {
+        const a = ys[i], b = ys[i + 1];
+        if (y > b) continue;
+        const m = (a + b) / 2;
+        let lo = 0, hi = 1;
+        for (let k = 0; k < 16; k++) {
+          const t = (lo + hi) / 2, u = 1 - t;
+          if (u * u * u * a + 3 * t * u * m + t * t * t * b < y) lo = t; else hi = t;
+        }
+        const t = (lo + hi) / 2;
+        return (1 - t) * (1 - t) * (1 + 2 * t) * anchors[i].x + t * t * (3 - 2 * t) * anchors[i + 1].x;
+      }
+      return anchors[anchors.length - 1].x;
+    };
+
+    const tracePath = (ys) => {
+      ctx.beginPath();
+      ctx.moveTo(anchors[0].x, ys[0]);
+      for (let i = 0; i < ys.length - 1; i++) {
+        const m = (ys[i] + ys[i + 1]) / 2;
+        ctx.bezierCurveTo(anchors[i].x, m, anchors[i + 1].x, m, anchors[i + 1].x, ys[i + 1]);
+      }
+    };
+
+    const draw = (now) => {
+      queued = 0;
+      const sy = scrollY, vh = innerHeight, w = innerWidth;
+      ctx.clearRect(0, 0, w, vh);
+      if (anchors.length < 2) return;
+      const ys = anchors.map((a) => a.y - sy);
+      const first = ys[0], last = ys[ys.length - 1];
+
+      // Where the dot rides: from its seat, to 42% of the viewport, to the footer logo over the last stretch.
+      const span = Math.max(1, root.scrollHeight - vh);
+      const f = clamp01(sy / span);
+      const top = clamp01(f / 0.12), bottom = clamp01((f - 0.88) / 0.12);
+      const y = Math.max(first, Math.min(last, first * (1 - top) + vh * 0.42 * (top - bottom) + last * bottom));
+      const x = threadX(ys, y);
+      const leave = ease(clamp01(sy / 240));
+      const r = homeR + (TRAVEL_R - homeR) * leave + (landR - TRAVEL_R) * ease(bottom);
+
+      // The thread draws itself out of the dot once the name has unfolded; scrolling finishes it at once.
+      const reveal = revealed || sy > 1 ? 1 : ease(clamp01((now - t0 - REVEAL_AT) / REVEAL_MS));
+      if (reveal < 1) schedule(); else revealed = true;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, w, reveal >= 1 ? vh : first + reveal * (vh - first));
+      ctx.clip();
+      ctx.strokeStyle = tangerine;
+      ctx.fillStyle = tangerine;
+      ctx.lineCap = "round";
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([0, 12]);
+      // Behind the dot the thread is travelled (solid tangerine dots); ahead of it, faint.
+      for (const [from, to, alpha] of [[-1, y, 0.95], [y, vh + 1, 0.4]]) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, from, w, to - from);
+        ctx.clip();
+        ctx.globalAlpha = alpha;
+        tracePath(ys);
+        ctx.stroke();
+        ctx.restore();
+      }
+      // A station for each scene: a ring that fills once the dot has passed it.
+      ctx.setLineDash([]);
+      ctx.lineWidth = 2;
+      for (let i = 1; i < ys.length - 1; i++) {
+        if (ys[i] < -10 || ys[i] > vh + 10) continue;
+        ctx.globalAlpha = ys[i] <= y ? 1 : 0.6;
+        ctx.beginPath();
+        ctx.arc(anchors[i].x, ys[i], 6, 0, Math.PI * 2);
+        if (ys[i] <= y) ctx.fill(); else ctx.stroke();
+      }
+      ctx.restore();
+
+      traveler.style.width = traveler.style.height = `${2 * r}px`;
+      traveler.style.transform = `translate(${x - r}px, ${y - r}px)`;
+      root.classList.toggle("dot-detached", sy > 1);
+    };
+
+    function schedule() { if (!queued) queued = requestAnimationFrame(draw); }
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", layout);
+    // Late fonts, the poster and the kinetic headings all move the scenes; re-anchor whenever the page resizes.
+    new ResizeObserver(layout).observe(document.body);
+    layout();
+  }
 
   /* ---------- Header and HUD follow the ground beneath them ---------- */
   const header = document.querySelector(".site-header");
@@ -104,7 +230,7 @@
     hudLabel.textContent = current?.dataset.label || "";
   };
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", () => { layoutTicks(); aimTerms(); onScroll(); });
+  window.addEventListener("resize", () => { layoutTicks(); onScroll(); });
   window.addEventListener("load", () => { layoutTicks(); onScroll(); });
   layoutTicks(); onScroll();
 
