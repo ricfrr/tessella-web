@@ -15,6 +15,23 @@
   applyTheme(theme);
   themeButton?.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
 
+  // Headlines end on the brand's dot: the stop that closes each line is tangerine.
+  document.querySelectorAll('.docs-hero h1, .doc-section > h2').forEach((heading) => {
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      const match = node.nodeValue.match(/([.?!])(\s*)$/);
+      const next = node.nextSibling;
+      if (!match || (next && next.nodeName !== 'BR')) return;
+      const stop = document.createElement('span');
+      stop.className = 'stop';
+      stop.textContent = match[1];
+      node.nodeValue = node.nodeValue.slice(0, match.index);
+      node.after(stop, match[2]);
+    });
+  });
+
   document.querySelectorAll('.code-block').forEach((block) => {
     const code = block.querySelector('code');
     if (!code) return;

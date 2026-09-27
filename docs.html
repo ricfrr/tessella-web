@@ -5,20 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Robo·Boy Documentation · tessel·la</title>
   <meta name="description" content="Learn how to run Robo-Boy, connect ROS 2 robots, use its built-in tools, and build standalone panels with the Robo-Boy Panel SDK." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="icon" href="media/projects/robo_boy/logo.png" />
+  <link rel="preload" href="fonts/BricolageGrotesque-normal-200-800-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <link rel="stylesheet" href="tokens.css" />
   <link rel="stylesheet" href="docs.css" />
+  <script>
+    // Apply the saved theme before first paint (shared key with the home page).
+    try {
+      const t = localStorage.getItem("tessella-theme");
+      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#content">Skip to documentation</a>
 
   <header class="docs-header">
     <div class="docs-nav">
-      <a class="docs-brand" href="index.html" aria-label="Tessella home">
-        <span class="brand-dot" aria-hidden="true"></span>
-        <span>tessel·la</span>
+      <a class="brand docs-brand" href="index.html" aria-label="tessel·la home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#3E5FD8"/><rect x="6" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5"/><rect x="23" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5"/><circle cx="16" cy="17.7" r="3.9" fill="#FF8722"/></svg>
+        <span>tessel<span class="mid">·</span>la</span>
       </a>
       <div class="docs-nav__meta">
         <a class="version-pill" href="https://github.com/tessel-la/robo-boy/releases/latest" target="_blank" rel="noopener">Latest Robo·Boy release</a>
@@ -32,9 +39,6 @@
   </header>
 
   <section class="docs-hero">
-    <div class="hero-grid" aria-hidden="true"></div>
-    <div class="hero-orb hero-orb--one" aria-hidden="true"></div>
-    <div class="hero-orb hero-orb--two" aria-hidden="true"></div>
     <div class="docs-wrap docs-hero__inner">
       <div class="docs-hero__copy">
         <div class="eyebrow"><span></span> Robo·Boy docs</div>
@@ -1204,7 +1208,7 @@ docker compose \
 
   <footer class="docs-footer">
     <div class="docs-wrap docs-footer__inner">
-      <a class="docs-brand" href="index.html"><span class="brand-dot"></span><span>tessel·la</span></a>
+      <a class="brand docs-brand" href="index.html" aria-label="tessel·la home"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#3E5FD8"/><rect x="6" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5"/><rect x="23" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5"/><circle cx="16" cy="17.7" r="3.9" fill="#FF8722"/></svg><span>tessel<span class="mid">·</span>la</span></a>
       <p>Open tools for the people who work with robots.</p>
       <div><a href="index.html">Home</a><a href="https://github.com/tessel-la/robo-boy" target="_blank" rel="noopener">Robo·Boy</a><a href="#overview">Top ↑</a></div>
     </div>
