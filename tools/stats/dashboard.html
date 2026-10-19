@@ -30,6 +30,7 @@
       }
 
       * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
       body {
         margin: 0;
         background: var(--bg);
@@ -310,7 +311,7 @@
           card('Visits per day', 'weekends lighter · the dot is the busiest day', dailyChart(d.daily)),
           el('div', { class: 'grid two' },
             card('Pages', null, list(d.pages, { of: d.totalVisits })),
-            card('Where they come from', 'the site that linked here', list(d.refs, { of: d.totalVisits }), d.campaigns?.length ? [el('h3', {}, 'Campaigns (ref, utm_campaign)'), list(d.campaigns)] : null),
+            card('Where they come from', 'the site that linked here, or a ?ref= tag', list(d.refs, { of: d.totalVisits })),
           ),
           el('div', { class: 'grid two' },
             card('Downloads', 'release files, by platform', list(d.downloads, { of: downloads, emptyText: 'No release file has been clicked yet.' })),
@@ -341,7 +342,7 @@
           ),
           el('div', { class: 'grid three' },
             card('Screens', null, list(d.sizes)),
-            card('Browser languages', null, list(d.languages)),
+            card('Browser languages', null, list(d.languages), d.languages?.length && d.languages.every((l) => l.unknown) ? el('p', { class: 'note' }, 'GoatCounter is not recording languages. Turn it on in its Settings, under the data it collects.') : null),
             card('Theme switches', 'from the toggle', list([{ name: 'to dark', count: d.theme.dark }, { name: 'to light', count: d.theme.light }], { emptyText: 'Nobody switched yet: they all kept their system theme.' })),
           ),
         );

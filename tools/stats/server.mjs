@@ -65,6 +65,8 @@ function siteNames() {
   return { sections, chapters, scenes };
 }
 
+const sizeNames = { phone: 'Phones', tablet: 'Tablets', desktop: 'Computer monitors', desktophd: 'Large monitors', unknown: 'Unknown' };
+
 const platforms = {
   macos: 'macOS',
   windows: 'Windows',
@@ -87,8 +89,14 @@ async function gc(path, params = {}) {
       continue;
     }
     if (!r.ok) {
-      const hint = r.status === 403 ? ' (does the token have "Read statistics"?)' : r.status === 401 ? ' (wrong token, or a token from another GoatCounter account)' : '';
-      throw new Error(`${path} → HTTP ${r.status}${hint}`);
+      // GoatCounter says why in its body, e.g. "this token does not have access to this site"
+      const said = await r.json().then((b) => b.error || b.errors && JSON.stringify(b.errors), () => '');
+      const hint =
+        /access to this site/.test(said) ? ` (the token was made on another site: create one on ${code}.goatcounter.com → API)`
+        : r.status === 403 ? ' (does the token have "Read statistics"?)'
+        : r.status === 401 ? ' (wrong token)'
+        : '';
+      throw new Error(`${path} → HTTP ${r.status}${said ? `: ${said}` : ''}${hint}`);
     }
     await sleep(260); // the API allows 4 requests per second
     return r.json();
@@ -125,9 +133,12 @@ async function collectReal(days) {
   }
   if (hits.more) warnings.push('more than the listed pages and events exist; the smallest ones are left out');
   const total = await safe(() => gc('/stats/total', range));
+  // Referrers, countries and devices only for page views: GoatCounter counts every event there too, which
+  // would make one visit with five clicks look like six visits.
+  const pageIds = (hits.hits ?? []).filter((h) => !h.event && h.path_id).map((h) => h.path_id).join(',');
   const side = {};
-  for (const page of ['toprefs', 'locations', 'systems', 'browsers', 'sizes', 'languages', 'campaigns']) {
-    side[page] = (await safe(() => gc(`/stats/${page}`, { ...range, limit: 12 })))?.stats ?? [];
+  for (const page of ['toprefs', 'locations', 'systems', 'browsers', 'sizes', 'languages']) {
+    side[page] = pageIds ? (await safe(() => gc(`/stats/${page}`, { ...range, limit: 12, include_paths: pageIds })))?.stats ?? [] : [];
   }
   return { hits: hits.hits ?? [], total, side, warnings, days };
 }
@@ -196,7 +207,6 @@ function collectDemo(days) {
       browsers: list([['Chrome', sum * 0.52], ['Firefox', sum * 0.21], ['Safari', sum * 0.16], ['Edge', sum * 0.06], ['Brave', sum * 0.02]]),
       sizes: list([['Computer monitors', sum * 0.71], ['Phones', sum * 0.18], ['Large phones, small tablets', sum * 0.07], ['Tablets and small laptops', sum * 0.04]]),
       languages: list([['English', sum * 0.58], ['Italian', sum * 0.17], ['German', sum * 0.1], ['Japanese', sum * 0.05], ['Spanish', sum * 0.04]]),
-      campaigns: list([['ros-discourse', 21], ['release-notes', 12]]),
     },
     warnings: [],
     days,
@@ -262,14 +272,15 @@ function shape(raw) {
     outbound: withPrefix('out-').map(({ key, count }) => ({ name: key, count })).sort(byCount).slice(0, 12),
     contact: get('contact-send'),
     theme: { dark: get('theme-dark'), light: get('theme-light') },
-    // visits with no referrer (bookmarks, typed addresses, links from apps and chats) come back with an empty name
-    refs: raw.side.toprefs.map((r) => ({ ...r, name: r.name?.trim() || 'Direct (bookmarks, apps, chats)' })),
-    campaigns: raw.side.campaigns,
+    // visits with no referrer (bookmarks, typed addresses, links from apps and chats) come back with an empty
+    // name; a ?ref= or utm_campaign tag comes back as a referrer with ref_scheme "c"
+    refs: raw.side.toprefs.map((r) => ({ ...r, name: r.ref_scheme === 'c' ? `${r.name} (campaign tag)` : r.name?.trim() || 'Direct (bookmarks, apps, chats)' })),
     countries: raw.side.locations,
     systems: raw.side.systems,
     browsers: raw.side.browsers,
-    sizes: raw.side.sizes,
-    languages: raw.side.languages,
+    // screen sizes come as ids without names
+    sizes: raw.side.sizes.map((r) => ({ ...r, name: r.name || sizeNames[r.id] || r.id })),
+    languages: raw.side.languages.map((r) => (r.id === '(unknown)' ? { ...r, name: 'Not recorded', unknown: true } : r)),
   };
 }
 
