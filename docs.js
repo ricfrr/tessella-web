@@ -1,5 +1,7 @@
 (() => {
   const root = document.documentElement;
+  // Anonymous counts (count.js); does nothing when the counter is off or blocked.
+  const count = (name, opts) => window.tessellaCount?.(name, opts);
   const themeButton = document.querySelector('.theme-toggle');
   const storedTheme = localStorage.getItem('tessella-theme');
   const preferredTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -13,7 +15,10 @@
   };
 
   applyTheme(theme);
-  themeButton?.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+  themeButton?.addEventListener('click', () => {
+    applyTheme(theme === 'dark' ? 'light' : 'dark');
+    count(`theme-${theme}`);
+  });
 
   // Headlines end on the brand's dot: the stop that closes each line is tangerine.
   document.querySelectorAll('.docs-hero h1, .doc-section > h2').forEach((heading) => {
@@ -42,6 +47,7 @@
     button.textContent = 'Copy';
     button.setAttribute('aria-label', `Copy ${block.dataset.language || 'code'} example`);
     button.addEventListener('click', async () => {
+      count(`docs-copy-${block.dataset.language || 'code'}`);
       try {
         await navigator.clipboard.writeText(code.textContent || '');
         button.textContent = 'Copied';
@@ -68,7 +74,11 @@
     .filter(Boolean);
   const mobileToc = document.getElementById('mobile-toc');
 
+  // A section counts as read once it has been the current one for a few seconds (once per visit).
+  let readTimer = 0;
   const setActiveSection = (id) => {
+    window.clearTimeout(readTimer);
+    readTimer = window.setTimeout(() => count(`docs-read-${id}`, { once: true }), 3000);
     links.forEach((link) => link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`));
     if (mobileToc && mobileToc.value !== `#${id}`) mobileToc.value = `#${id}`;
   };

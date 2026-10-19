@@ -31,6 +31,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Leave the local tools out of the site
+        run: rm -rf tools package.json .gitignore
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

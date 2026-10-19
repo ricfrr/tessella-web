@@ -1,0 +1,6 @@
+# secrets (the dashboard's GoatCounter token)
+.env
+.env.*
+
+# macOS
+.DS_Store

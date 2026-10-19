@@ -1,0 +1,18 @@
+{
+  "name": "tessella-web",
+  "private": true,
+  "description": "The tessel·la site. Static, no build step and no dependencies: these scripts only run the local visitor-count dashboard.",
+  "type": "module",
+  "scripts": {
+    "stats": "node tools/stats/server.mjs",
+    "stats:demo": "node tools/stats/server.mjs --demo",
+    "stats:install": "node tools/stats/service.mjs install",
+    "stats:uninstall": "node tools/stats/service.mjs uninstall",
+    "stats:status": "node tools/stats/service.mjs status",
+    "stats:logs": "node tools/stats/service.mjs logs",
+    "stats:restart": "node tools/stats/service.mjs restart"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

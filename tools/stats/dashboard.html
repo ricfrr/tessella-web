@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>tessel·la numbers</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#FFF6D5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Numbers" />
+    <link rel="preload" href="/fonts/BricolageGrotesque-normal-200-800-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CourierPrime-normal-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/fonts/fonts.css" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <script>
+      try {
+        const t = localStorage.getItem('tessella-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <style>
+      /* The site's tokens.css predates the handbook's --well and status inks; they are added here until it catches up. */
+      :root { --well: rgba(18, 18, 18, .045); --warn-ink: #8F5D00; --warn-wash: rgba(201, 130, 0, .14); --muted-bar: rgba(62, 95, 216, .42); }
+      :root[data-theme='dark'] { --well: rgba(255, 246, 213, .05); --warn-ink: #F0B84A; --muted-bar: rgba(159, 179, 255, .42); }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) { --well: rgba(255, 246, 213, .05); --warn-ink: #F0B84A; --muted-bar: rgba(159, 179, 255, .42); }
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 400 16px/1.5 var(--body);
+        -webkit-font-smoothing: antialiased;
+        font-variant-numeric: tabular-nums;
+      }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+      header.top { position: sticky; top: 0; z-index: 5; background: var(--header-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-soft); }
+      .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; min-height: 68px; padding-block: 10px; }
+      .brand { color: var(--brand); }
+      .brand .label { color: var(--ink-mute); font-size: 13px; margin-left: 4px; }
+      .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+      .range { display: inline-flex; padding: 3px; border: 1.5px solid var(--border); border-radius: 999px; }
+      .range button {
+        min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft);
+        font: 700 14px/1 var(--mono); cursor: pointer;
+      }
+      .range button[aria-pressed='true'] { background: var(--brand); color: var(--bg); }
+      .tools .btn { min-height: 44px; padding: 10px 18px; font-size: 14px; }
+      .demo { color: var(--warn-ink); background: var(--warn-wash); }
+
+      .hero { padding: clamp(32px, 6vw, 64px) 0 8px; display: grid; gap: 14px; }
+      .hero .label { color: var(--ink-mute); font-size: 14px; }
+      h1 {
+        margin: 0; color: var(--brand); font: 800 clamp(44px, 7vw, 92px)/0.88 var(--display); font-stretch: 75%;
+        font-variation-settings: 'opsz' 96; letter-spacing: -0.012em; text-wrap: balance;
+      }
+      .lede { margin: 0; max-width: 58ch; color: var(--ink-soft); font-size: clamp(16px, 1.4vw, 19px); }
+
+      main { display: grid; gap: 20px; padding-block: 28px 56px; }
+      .grid { display: grid; gap: 20px; align-items: start; }
+      .kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); align-items: stretch; }
+      .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+      .three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+
+      .card { min-width: 0; background: var(--paper); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 20px 22px 22px; }
+      .card h2 { margin: 0 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; font: 700 19px/1.2 var(--body); }
+      .card h2 small { color: var(--ink-mute); font: 400 13px/1.3 var(--mono); }
+      .card h3 { margin: 18px 0 10px; color: var(--ink-mute); font: 800 12px/1 var(--label); letter-spacing: .06em; text-transform: uppercase; }
+      .card h2 + h3 { margin-top: 0; }
+
+      .kpi { display: grid; gap: 6px; align-content: start; }
+      .kpi .n { font: 800 clamp(40px, 4.4vw, 56px)/0.95 var(--display); font-stretch: 75%; letter-spacing: -0.02em; color: var(--brand); }
+      .kpi .l { font: 800 12px/1.1 var(--label); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+      .kpi .s { color: var(--ink-mute); font-size: 14px; line-height: 1.4; }
+
+      svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+      svg.chart text { font: 12px var(--mono); fill: var(--ink-mute); }
+      .tip {
+        position: fixed; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .1s;
+        padding: 7px 11px; border-radius: var(--radius-sm); background: var(--ink); color: var(--bg); font: 700 13px/1.3 var(--mono); white-space: nowrap;
+      }
+
+      ul.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+      ul.list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; font-size: 15px; }
+      ul.list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      ul.list .val { font: 700 14px/1 var(--mono); }
+      ul.list .val small { color: var(--ink-mute); font-weight: 400; margin-left: 6px; }
+      ul.list .track { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--well); overflow: hidden; }
+      ul.list .track b { display: block; height: 100%; border-radius: 4px; background: var(--brand); }
+      .group { margin: 14px 0 2px; color: var(--ink-mute); font: 800 11px/1 var(--label); letter-spacing: .06em; text-transform: uppercase; }
+      .group:first-child { margin-top: 0; }
+      .empty { margin: 0; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--well); color: var(--ink-mute); font-size: 14px; }
+
+      .funnel { display: grid; gap: 12px; }
+      .step { display: grid; grid-template-columns: minmax(150px, 34%) 1fr auto; gap: 14px; align-items: center; font-size: 15px; }
+      .step .track { height: 24px; border-radius: 6px; background: var(--well); overflow: hidden; }
+      .step .track b { display: block; height: 100%; min-width: 2px; border-radius: 6px; background: var(--brand); }
+      .step.sub .track b { background: var(--muted-bar); }
+      .step .v { min-width: 9ch; text-align: right; font: 700 14px/1 var(--mono); }
+      .step .v small { display: block; margin-top: 3px; color: var(--ink-mute); font-weight: 400; font-size: 12px; }
+      .note { margin: 14px 0 0; color: var(--ink-mute); font-size: 14px; }
+
+      .warn { padding: 12px 16px; border-radius: var(--radius-sm); background: var(--warn-wash); color: var(--warn-ink); font: 700 14px/1.4 var(--mono); }
+      .warn::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 10px; border-radius: 50%; background: currentColor; vertical-align: 1px; }
+      footer { padding: 0 0 40px; color: var(--ink-mute); font: 13px/1.5 var(--mono); }
+
+      @media (max-width: 560px) {
+        header.top { position: static; }
+        .step { grid-template-columns: 1fr auto; }
+        .step .track { grid-column: 1 / -1; order: 3; }
+        .range button { padding: 0 12px; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#app">Skip to the numbers</a>
+    <header class="top">
+      <div class="wrap bar">
+        <span class="brand">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#3E5FD8" /><rect x="6" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5" /><rect x="23" y="4" width="3" height="24" rx="1.5" fill="#FFF6D5" /><circle cx="16" cy="17.7" r="3.9" fill="#FF8722" /></svg>
+          <span>tessel<span class="mid">·</span>la</span><span class="label">numbers</span>
+        </span>
+        <div class="tools">
+          <span id="demo" class="chip demo" hidden>made-up data</span>
+          <div class="range" role="group" aria-label="Period">
+            <button type="button" data-days="7" aria-pressed="false">7 days</button>
+            <button type="button" data-days="30" aria-pressed="true">30 days</button>
+            <button type="button" data-days="90" aria-pressed="false">90 days</button>
+          </div>
+          <button class="btn btn--quiet" id="refresh" type="button">Refresh</button>
+          <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section class="hero">
+        <p class="label" id="eyebrow">Visitor counts</p>
+        <h1 id="headline">the last 30 days<span class="stop">.</span></h1>
+        <p class="lede">Who came to tessel·la, what they looked at and what they took home. Anonymous counts: no cookies, no IP addresses, nobody followed between visits.</p>
+      </section>
+      <main id="app"><p class="empty">Fetching the numbers…</p></main>
+      <footer id="foot"></footer>
+    </div>
+    <div class="tip" id="tip" role="presentation"></div>
+
+    <script>
+      const $ = (s, r = document) => r.querySelector(s);
+      const nf = new Intl.NumberFormat('en-US');
+      const n = (v) => nf.format(v ?? 0);
+      const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : '–');
+      const dayLabel = (d, opts) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', opts);
+
+      // Everything that comes from visitors (referrers, paths) goes through text nodes, never innerHTML.
+      const el = (tag, props = {}, ...kids) => {
+        const e = document.createElement(tag);
+        for (const [k, v] of Object.entries(props)) {
+          if (v == null) continue;
+          if (k === 'class') e.className = v;
+          else e.setAttribute(k, v);
+        }
+        for (const kid of kids.flat()) if (kid != null && kid !== false) e.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+        return e;
+      };
+      const svgEl = (tag, attrs = {}, ...kids) => {
+        const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        for (const kid of kids) e.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+        return e;
+      };
+
+      /* ---------- theme, as on the site ---------- */
+      const root = document.documentElement;
+      const themeButton = $('.theme-toggle');
+      const currentTheme = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const syncThemeLabel = () => themeButton.setAttribute('aria-label', `Switch to ${currentTheme() === 'dark' ? 'light' : 'dark'} theme`);
+      themeButton.addEventListener('click', () => {
+        root.dataset.theme = currentTheme() === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('tessella-theme', root.dataset.theme); } catch (e) {}
+        syncThemeLabel();
+      });
+      syncThemeLabel();
+
+      /* ---------- building blocks ---------- */
+      const card = (title, small, ...body) => el('section', { class: 'card' }, el('h2', {}, title, small ? el('small', {}, small) : null), ...body);
+      const kpi = (value, label, sub) => el('section', { class: 'card kpi' }, el('div', { class: 'n' }, value), el('div', { class: 'l' }, label), sub ? el('div', { class: 's' }, sub) : null);
+      const empty = (text) => el('p', { class: 'empty' }, text);
+
+      function list(rows, { of, emptyText = 'Nothing yet.' } = {}) {
+        rows = (rows ?? []).filter((r) => r.count > 0);
+        if (!rows.length) return empty(emptyText);
+        const max = Math.max(...rows.map((r) => r.count), 1);
+        return el('ul', { class: 'list' }, rows.map((r) => el('li', { title: String(r.name) },
+          el('span', { class: 'name' }, r.name),
+          el('span', { class: 'val' }, n(r.count), of ? el('small', {}, pct(r.count, of)) : null),
+          el('span', { class: 'track' }, el('b', { style: `width:${(r.count / max) * 100}%` })),
+        )));
+      }
+
+      function funnel(steps, base) {
+        base = Math.max(base, 1);
+        return el('div', { class: 'funnel' }, steps.map(([label, v, sub]) => el('div', { class: sub ? 'step sub' : 'step' },
+          el('span', {}, label),
+          el('span', { class: 'track' }, el('b', { style: `width:${Math.min(100, (v / base) * 100)}%` })),
+          el('span', { class: 'v' }, n(v), el('small', {}, pct(v, base))),
+        )));
+      }
+
+      // Visits per day: one series in the brand colour, weekends lighter, the best day carries the dot.
+      function dailyChart(daily) {
+        const W = 960, H = 250, L = 40, B = 28, T = 18, GAP = 2;
+        const max = Math.max(...daily.map((d) => d.count), 4);
+        const step = Math.pow(10, Math.floor(Math.log10(max / 4)));
+        const tick = [1, 2, 2.5, 5, 10].map((m) => m * step).find((t) => max / t <= 4) ?? max / 4;
+        const top = Math.ceil(max / tick) * tick;
+        const bw = (W - L) / daily.length;
+        const best = daily.reduce((a, b) => (b.count > a.count ? b : a), daily[0]);
+        const brand = getComputedStyle(root).getPropertyValue('--brand').trim();
+        const muted = getComputedStyle(root).getPropertyValue('--muted-bar').trim();
+        const accent = getComputedStyle(root).getPropertyValue('--accent').trim();
+        const grid = getComputedStyle(root).getPropertyValue('--border').trim();
+        const total = daily.reduce((a, d) => a + d.count, 0);
+        const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart', role: 'img', 'aria-label': `Visits per day: ${n(total)} in ${daily.length} days, the busiest ${dayLabel(best.day, { month: 'long', day: 'numeric' })} with ${n(best.count)}.` });
+        for (let v = 0; v <= top; v += tick) {
+          const y = T + (H - B - T) * (1 - v / top);
+          svg.append(svgEl('line', { x1: L, x2: W, y1: y, y2: y, stroke: grid, 'stroke-width': 1, 'stroke-dasharray': v ? '2 5' : '0' }));
+          svg.append(svgEl('text', { x: L - 8, y: y + 4, 'text-anchor': 'end' }, n(v)));
+        }
+        const tip = $('#tip');
+        const every = daily.length > 40 ? 14 : daily.length > 14 ? 5 : 1;
+        daily.forEach((d, i) => {
+          const h = ((H - B - T) * d.count) / top;
+          const x = L + i * bw;
+          const wd = new Date(`${d.day}T12:00:00`).getDay();
+          const w = Math.max(1, bw - GAP * 2);
+          const r = Math.min(4, w / 2, h);
+          // rounded data end on top, square on the baseline
+          if (d.count) {
+            const y0 = H - B, y1 = H - B - Math.max(h, 2), x0 = x + GAP, x1 = x0 + w;
+            svg.append(svgEl('path', { d: `M${x0},${y0} V${y1 + r} Q${x0},${y1} ${x0 + r},${y1} H${x1 - r} Q${x1},${y1} ${x1},${y1 + r} V${y0} Z`, fill: wd === 0 || wd === 6 ? muted : brand }));
+          }
+          if (d === best && d.count) svg.append(svgEl('circle', { cx: x + bw / 2, cy: H - B - h - 9, r: Math.min(5, bw / 2), fill: accent }));
+          const hit = svgEl('rect', { x, y: T, width: bw, height: H - B - T, fill: 'transparent' });
+          hit.addEventListener('pointermove', (e) => {
+            tip.textContent = `${dayLabel(d.day, { weekday: 'short', month: 'short', day: 'numeric' })} · ${n(d.count)} ${d.count === 1 ? 'visit' : 'visits'}`;
+            tip.style.left = `${Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8)}px`;
+            tip.style.top = `${e.clientY - 40}px`;
+            tip.style.opacity = 1;
+          });
+          hit.addEventListener('pointerleave', () => (tip.style.opacity = 0));
+          svg.append(hit);
+          if (i % every === 0) svg.append(svgEl('text', { x: x + bw / 2, y: H - 8, 'text-anchor': 'middle' }, dayLabel(d.day, { month: 'short', day: 'numeric' })));
+        });
+        return svg;
+      }
+
+      // Docs sections in the order of the table of contents, grouped like it.
+      function docsDepth(rows, docsVisits) {
+        if (!rows.some((r) => r.count)) return empty('No section has been read yet. A section counts once it stays on screen for 3 seconds.');
+        const out = [];
+        let group = null, current = null;
+        for (const r of rows) {
+          if (r.group !== group) {
+            group = r.group;
+            out.push(el('p', { class: 'group' }, group));
+            current = [];
+            out.push(current);
+          }
+          current.push(r);
+        }
+        const max = Math.max(...rows.map((r) => r.count), 1);
+        return el('div', {}, out.map((part) => (Array.isArray(part)
+          ? el('ul', { class: 'list' }, part.map((r) => el('li', {}, el('span', { class: 'name' }, r.label), el('span', { class: 'val' }, n(r.count), el('small', {}, pct(r.count, docsVisits))), el('span', { class: 'track' }, el('b', { style: `width:${(r.count / max) * 100}%` })))))
+          : part)));
+      }
+
+      /* ---------- the page ---------- */
+      let days = [7, 30, 90].includes(Number(new URLSearchParams(location.search).get('days'))) ? Number(new URLSearchParams(location.search).get('days')) : 30;
+      let stale = false;
+
+      function render(d) {
+        const app = $('#app');
+        app.replaceChildren();
+        $('#demo').hidden = !d.demo;
+        $('#headline').replaceChildren(`the last ${d.days} days`, el('span', { class: 'stop' }, '.'));
+        if (stale) app.append(el('div', { class: 'warn' }, 'The dashboard service is not answering, so these are the last numbers it saved. Start it again with npm run stats:install.'));
+        if (d.warnings?.length) app.append(el('div', { class: 'warn' }, `Some numbers did not arrive: ${d.warnings.join(' · ')}`));
+
+        const best = d.daily.reduce((a, b) => (b.count > a.count ? b : a), { count: -1 });
+        const downloads = d.downloads.reduce((a, r) => a + r.count, 0);
+        const t = d.teaser;
+        const firstScene = d.reached[0]?.count ?? 0;
+
+        app.append(
+          el('div', { class: 'grid kpis' },
+            kpi(n(d.totalVisits), 'visits', `${n(d.homeVisits)} home · ${n(d.docsVisits)} docs`),
+            kpi(best.count > 0 ? n(best.count) : '–', 'busiest day', best.count > 0 ? dayLabel(best.day, { weekday: 'long', month: 'long', day: 'numeric' }) : 'no visits yet'),
+            kpi(n(downloads), 'downloads', d.downloads[0] ? `most for ${d.downloads[0].name}` : 'release files clicked'),
+            kpi(pct(t.play, d.homeVisits), 'play the teaser', `${n(t.play)} plays · ${n(t.end)} to the end`),
+          ),
+          card('Visits per day', 'weekends lighter · the dot is the busiest day', dailyChart(d.daily)),
+          el('div', { class: 'grid two' },
+            card('Pages', null, list(d.pages, { of: d.totalVisits })),
+            card('Where they come from', 'the site that linked here', list(d.refs, { of: d.totalVisits }), d.campaigns?.length ? [el('h3', {}, 'Campaigns (ref, utm_campaign)'), list(d.campaigns)] : null),
+          ),
+          el('div', { class: 'grid two' },
+            card('Downloads', 'release files, by platform', list(d.downloads, { of: downloads, emptyText: 'No release file has been clicked yet.' })),
+            card('The teaser', 'compared to home visits',
+              funnel([
+                ['Visit the home page', d.homeVisits],
+                [`Scroll to ${d.reached[0]?.name ?? 'the teaser'}`, firstScene],
+                ['Press play', t.play],
+                ['Watch past half way', t.half, true],
+                ['Watch to the end', t.end, true],
+              ], d.homeVisits),
+              el('h3', { style: 'margin-top:22px' }, 'Chapters jumped to'),
+              list(d.chapters, { emptyText: 'No chapter clicked yet.' }),
+            ),
+          ),
+          el('div', { class: 'grid two' },
+            card('What docs readers read', 'share of docs visits', docsDepth(d.docsRead, d.docsVisits)),
+            el('div', { class: 'grid', style: 'align-content:start' },
+              card('How far down the home page', null, funnel([['Arrive', d.homeVisits], ...d.reached.map((s) => [s.name, s.count]), ['Compose a message', d.contact, true]], d.homeVisits), el('p', { class: 'note' }, 'A message counts when the contact form opens the mail app. What it says is never counted.')),
+              card('Links out', 'GitHub, panels, tools', list(d.outbound, { emptyText: 'No outbound link clicked yet.' })),
+              card('Code copied from the docs', null, list(d.copies, { emptyText: 'Nothing copied yet.' })),
+            ),
+          ),
+          el('div', { class: 'grid three' },
+            card('Countries', null, list(d.countries)),
+            card('Systems', null, list(d.systems)),
+            card('Browsers', null, list(d.browsers)),
+          ),
+          el('div', { class: 'grid three' },
+            card('Screens', null, list(d.sizes)),
+            card('Browser languages', null, list(d.languages)),
+            card('Theme switches', 'from the toggle', list([{ name: 'to dark', count: d.theme.dark }, { name: 'to light', count: d.theme.light }], { emptyText: 'Nobody switched yet: they all kept their system theme.' })),
+          ),
+        );
+        $('#foot').textContent = `From ${d.code ?? 'demo'}.goatcounter.com · anonymous counts, no cookies · updated ${new Date(d.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+
+      async function load(fresh = false) {
+        document.querySelectorAll('[data-days]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
+        history.replaceState(null, '', days === 30 ? '/' : `/?days=${days}`);
+        try {
+          const r = await fetch(`/api/data?days=${days}${fresh ? '&fresh=1' : ''}`);
+          stale = r.headers.get('X-Stale') === '1';
+          const d = await r.json();
+          if (d.error) throw new Error(d.error);
+          window.__last = d;
+          render(d);
+        } catch (e) {
+          $('#app').replaceChildren(el('div', { class: 'warn' }, `Can't read the numbers: ${e.message}`));
+        }
+      }
+      document.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { days = Number(b.dataset.days); load(); }));
+      $('#refresh').addEventListener('click', () => load(true));
+      // the chart reads its colours from the theme, so redraw it when the theme changes
+      new MutationObserver(() => window.__last && render(window.__last)).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { syncThemeLabel(); window.__last && render(window.__last); });
+      load();
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+    </script>
+  </body>
+</html>

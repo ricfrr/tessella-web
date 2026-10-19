@@ -1,6 +1,8 @@
 (() => {
   const root = document.documentElement;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Anonymous counts (count.js); does nothing when the counter is off or blocked.
+  const count = (name, opts) => window.tessellaCount?.(name, opts);
 
   /* ---------- Theme (same storage key as the docs) ---------- */
   const themeButton = document.querySelector(".theme-toggle");
@@ -12,7 +14,10 @@
     themeButton?.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
     updateTones();
   };
-  themeButton?.addEventListener("click", () => applyTheme(currentTheme() === "dark" ? "light" : "dark"));
+  themeButton?.addEventListener("click", () => {
+    applyTheme(currentTheme() === "dark" ? "light" : "dark");
+    count(`theme-${currentTheme()}`);
+  });
 
   document.querySelectorAll("[data-year]").forEach((el) => { el.textContent = new Date().getFullYear(); });
 
@@ -229,6 +234,15 @@
     const current = [...labelled].reverse().find((s) => s.getBoundingClientRect().top <= window.innerHeight * 0.5) || labelled[0];
     hudLabel.textContent = current?.dataset.label || "";
   };
+  // How far down the page visitors get: each scene counts once per visit when it reaches mid-screen.
+  if ("IntersectionObserver" in window) {
+    const reached = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      count(`reached-${e.target.id}`, { once: true });
+      reached.unobserve(e.target);
+    }), { rootMargin: "0px 0px -50% 0px" });
+    labelled.filter((s) => s.id && s.id !== "top").forEach((s) => reached.observe(s));
+  }
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", () => { layoutTicks(); onScroll(); });
   window.addEventListener("load", () => { layoutTicks(); onScroll(); });
@@ -246,10 +260,18 @@
     if (video.readyState >= 1) seek();
     else { video.addEventListener("loadedmetadata", seek, { once: true }); video.load(); }
   };
+  const chapterName = (b) => b.textContent.replace(/^\s*[\d:]+\s*/, "").trim();
   document.querySelector(".teaser-play")?.addEventListener("click", () => play());
-  chapterButtons.forEach((b) => b.addEventListener("click", () => play(Number(b.dataset.t))));
+  chapterButtons.forEach((b) => b.addEventListener("click", () => {
+    count(`teaser-chapter-${chapterName(b)}`);
+    play(Number(b.dataset.t));
+  }));
+  // Teaser counts, once per visit each: started, past half way, watched to the end.
+  video?.addEventListener("play", () => count("teaser-play", { once: true }));
+  video?.addEventListener("ended", () => count("teaser-end", { once: true }));
   video?.addEventListener("timeupdate", () => {
     const t = video.currentTime;
+    if (video.duration && t >= video.duration / 2) count("teaser-half", { once: true });
     let active = null;
     chapterButtons.forEach((b) => { if (t >= Number(b.dataset.t) - 0.05) active = b; });
     chapterButtons.forEach((b) => b.classList.toggle("is-active", b === active));
@@ -269,6 +291,7 @@
     }
     const subject = encodeURIComponent(`tessel·la message from ${name}`);
     const body = encodeURIComponent(`From: ${name} <${email}>\n\n${message}`);
+    count("contact-send"); // only that a message was composed, never what it says
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
     status.textContent = "Opening your mail app…";
   });
