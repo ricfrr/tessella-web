@@ -15,7 +15,7 @@ architecture, built-in panels, and the complete external Panel SDK authoring and
 - `docs.html`, `docs.css`, `docs.js`: the Robo·Boy documentation.
 - `tokens.css`: the shared design tokens (palette, type roles, brand mark, buttons, chips) used by both pages.
 - `fonts/`: self-hosted Bricolage Grotesque, Courier Prime and Doto (SIL OFL 1.1, licences included).
-- `media/videos/robo-boy/`: the 84-second teaser (H.264, 1080p30) and its poster, with the subtitle "your robot playground." in the opening and closing.
+- `media/videos/robo-boy/`: the 58-second teaser (H.264, 1080p30) and its poster, with the subtitle "your robot playground." in the opening and closing.
 - `count.js`: anonymous visitor counts (below).
 - `tools/stats/`: the local dashboard for those counts. It is left out of the published site.
 
